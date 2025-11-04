@@ -3,16 +3,17 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("kotlin-kapt")
+    id ("kotlin-parcelize")
 }
 
 android {
     namespace = "com.devgardenaj.thisday"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.devgardenaj.thisday"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -55,6 +56,8 @@ dependencies {
     implementation(libs.androidx.room.runtime.android)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.leanback)
+    implementation(libs.androidx.navigation.runtime.android)
+    implementation(libs.androidx.navigation.compose.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
