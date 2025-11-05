@@ -8,13 +8,13 @@ import com.devgardenaj.thisday.Category
 @Dao
 interface CategoryDao {
     @Query("SELECT * FROM Category")
-    fun getAll(): List<Category>
+    suspend  fun getAll(): List<Category>
     @Insert
-    fun insertAll(vararg category: Category)
+    suspend  fun insertAll(vararg category: Category)
     @Query("SELECT * FROM Category WHERE categoryID = :categoryID")
-    suspend fun getCategoryByID(categoryID: Int): List<Category>
+     suspend fun getCategoryByID(categoryID: Int): List<Category>
     @Query("DELETE FROM Category")
-    fun deleteAll()
+    suspend  fun deleteAll()
 }
 
 @Dao

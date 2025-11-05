@@ -1,11 +1,10 @@
 package com.devgardenaj.thisday
 
 import android.annotation.SuppressLint
-import android.graphics.Color.parseColor
 import android.os.Bundle
 import android.os.Parcelable
+import android.util.Log
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,30 +22,40 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat.getString
-import androidx.core.graphics.toColorInt
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.parcelize.Parcelize
-import kotlinx.parcelize.RawValue
-import android.content.Context
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.draw.clip
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.room.Room
 import com.devgardenaj.thisday.infra.CategoryColors
+import com.devgardenaj.thisday.room.CategoryDao
+import kotlinx.coroutines.launch
 
 class CategoryActivity : AppCompatActivity() {
 
+    private val viewModel by lazy {
+        val db = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java,
+            "category-db"
+        ).build()
+        val repo = CategoryRepository(db.CategoryDao())
+        CategoryViewModel(repo)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent {
-            CategoryApp()
+            CategoryApp(viewModel)
         }
     }
 }
@@ -61,29 +70,25 @@ val categoryColor: String
 ) : Parcelable
 
 @Composable
-fun CategoryApp() {
+fun CategoryApp(viewModel: CategoryViewModel) {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "list") {
         composable("list") {
-            CategoryListScreen(navController)
+            CategoryListScreen(navController,viewModel)
         }
         composable("edit") {
-            CategoryEditScreen(navController)
+            CategoryEditScreen(navController,viewModel)
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoryListScreen(navController: NavHostController) {
-    var categories by remember {
-        mutableStateOf(
-            listOf(
-                CategoryTemp(1, "Цветы", "#E57373"),
-                CategoryTemp(2, "Овощи", "#FF8C84"),
-                CategoryTemp(3, "Фрукты", "#FF1C84")
-            )
-        )
+fun CategoryListScreen(navController: NavHostController, viewModel: CategoryViewModel) {
+    val categories by viewModel.categories
+
+    LaunchedEffect(Unit) {
+        viewModel.loadCategories()
     }
 
     Scaffold(
@@ -106,10 +111,14 @@ fun CategoryListScreen(navController: NavHostController) {
         ) {
             items(categories, key = { it.categoryID }) { category ->
                 CategoryRow(
-                    category = category,
+                    category = CategoryTemp(
+                        category.categoryID,
+                        category.categoryName,
+                        category.categoryColor
+                    ),
                     onEdit = { navController.navigate("edit") },
                     onDelete = {
-                        categories = categories.filter { it.categoryID != category.categoryID }
+
                     }
                 )
                 Divider()
@@ -120,6 +129,9 @@ fun CategoryListScreen(navController: NavHostController) {
 
 @Composable
 fun CategoryRow(category: CategoryTemp, onEdit: () -> Unit, onDelete: () -> Unit) {
+
+
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -129,12 +141,14 @@ fun CategoryRow(category: CategoryTemp, onEdit: () -> Unit, onDelete: () -> Unit
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
+
                 modifier = Modifier
                     .size(24.dp)
                     .background(
                         color = Color(android.graphics.Color.parseColor(category.categoryColor)),
                         shape = CircleShape
                     )            )
+            Log.d("Here", "Color" + category.categoryColor)
             Spacer(modifier = Modifier.width(12.dp))
             Text(category.categoryName, fontWeight = FontWeight.Medium)
         }
@@ -152,7 +166,7 @@ fun CategoryRow(category: CategoryTemp, onEdit: () -> Unit, onDelete: () -> Unit
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoryEditScreen(navController: NavHostController) {
+fun CategoryEditScreen(navController: NavHostController, viewModel: CategoryViewModel) {
     val colors = CategoryColors
     var name by remember { mutableStateOf("") }
     var selectedColor by remember { mutableStateOf(colors[0]) }
@@ -161,12 +175,15 @@ fun CategoryEditScreen(navController: NavHostController) {
 
 
     Scaffold(
-        topBar = {
-            TopAppBar(title = { Text(stringResource(R.string.category_name)) })
-        },
+        topBar = { TopAppBar(title = { Text(stringResource(R.string.category_name)) }) },
         bottomBar = {
             Button(
-                onClick = { navController.popBackStack() },
+                onClick = {
+                    if (name.isNotBlank()) {
+                        viewModel.insertCategory(name, ColorToHex(selectedColor))
+                        navController.popBackStack()
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
@@ -227,6 +244,29 @@ fun CategoryEditScreen(navController: NavHostController) {
                     }
                 }
             }
+        }
+    }
+}
+
+class CategoryRepository(private val dao: CategoryDao) {
+    suspend fun insert(category: Category) = dao.insertAll(category)
+    suspend fun getAll() = dao.getAll()
+}
+
+class CategoryViewModel(private val repository: CategoryRepository) : ViewModel() {
+    var categories = mutableStateOf<List<Category>>(emptyList())
+        private set
+
+    fun loadCategories() {
+        viewModelScope.launch {
+            categories.value = repository.getAll()
+        }
+    }
+
+    fun insertCategory(name: String, color: String) {
+        viewModelScope.launch {
+            repository.insert(Category(0, name, color))
+            loadCategories()
         }
     }
 }
