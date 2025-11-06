@@ -3,6 +3,7 @@ package com.devgardenaj.thisday.room
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.devgardenaj.thisday.Category
 
 @Dao
@@ -15,6 +16,8 @@ interface CategoryDao {
      suspend fun getCategoryByID(categoryID: Int): List<Category>
     @Query("DELETE FROM Category")
     suspend  fun deleteAll()
+    @Update
+    suspend fun update(category: Category)
 }
 
 @Dao

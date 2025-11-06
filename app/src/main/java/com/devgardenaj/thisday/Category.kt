@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.Alignment
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -17,7 +18,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -38,7 +38,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.room.Room
 import com.devgardenaj.thisday.infra.CategoryColors
 import com.devgardenaj.thisday.room.CategoryDao
+import com.devgardenaj.thisday.room.*
 import kotlinx.coroutines.launch
+
 
 class CategoryActivity : AppCompatActivity() {
 
@@ -76,8 +78,9 @@ fun CategoryApp(viewModel: CategoryViewModel) {
         composable("list") {
             CategoryListScreen(navController,viewModel)
         }
-        composable("edit") {
-            CategoryEditScreen(navController,viewModel)
+        composable("edit/{categoryId}") { backStackEntry ->
+            val categoryId = backStackEntry.arguments?.getString("categoryId")?.toIntOrNull()
+            CategoryEditScreen(navController, viewModel, categoryId)
         }
     }
 }
@@ -97,31 +100,43 @@ fun CategoryListScreen(navController: NavHostController, viewModel: CategoryView
                 title = { Text(stringResource(R.string.category)) }
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(onClick = { navController.navigate("edit") }) {
-                Text("+")
-            }
-        }
-    ) { padding ->
-        LazyColumn(
-            contentPadding = padding,
+    ) { paddingValues ->
+
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(paddingValues)
         ) {
-            items(categories, key = { it.categoryID }) { category ->
-                CategoryRow(
-                    category = CategoryTemp(
-                        category.categoryID,
-                        category.categoryName,
-                        category.categoryColor
-                    ),
-                    onEdit = { navController.navigate("edit") },
-                    onDelete = {
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                contentPadding = PaddingValues(vertical = 8.dp)
+            ) {
+                items(categories, key = { it.categoryID }) { category ->
+                    CategoryRow(
+                        category = CategoryTemp(
+                            category.categoryID,
+                            category.categoryName,
+                            category.categoryColor
+                        ),
+                        onEdit = { navController.navigate("edit/${category.categoryID}") },
+                        onDelete = { }
+                    )
+                    Divider()
+                }
+            }
 
-                    }
-                )
-                Divider()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Button(onClick = { navController.navigate("edit/0") }) {
+                    Text("+")
+                }
             }
         }
     }
@@ -166,13 +181,23 @@ fun CategoryRow(category: CategoryTemp, onEdit: () -> Unit, onDelete: () -> Unit
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoryEditScreen(navController: NavHostController, viewModel: CategoryViewModel) {
+fun CategoryEditScreen(navController: NavHostController, viewModel: CategoryViewModel, categoryId: Int?) {
+
+
     val colors = CategoryColors
     var name by remember { mutableStateOf("") }
     var selectedColor by remember { mutableStateOf(colors[0]) }
     var showColorPicker by remember { mutableStateOf(false) }
 
-
+    LaunchedEffect(categoryId) {
+        if (categoryId != null && categoryId != 0) {
+            val category = viewModel.getCategoryById(categoryId)
+            if (category != null) {
+                name = category.categoryName
+                selectedColor = Color(android.graphics.Color.parseColor(category.categoryColor))
+            }
+        }
+    }
 
     Scaffold(
         topBar = { TopAppBar(title = { Text(stringResource(R.string.category_name)) }) },
@@ -180,7 +205,11 @@ fun CategoryEditScreen(navController: NavHostController, viewModel: CategoryView
             Button(
                 onClick = {
                     if (name.isNotBlank()) {
-                        viewModel.insertCategory(name, ColorToHex(selectedColor))
+                        if (categoryId == null || categoryId == 0) {
+                            viewModel.insertCategory(name, ColorToHex(selectedColor))
+                        } else {
+                            viewModel.updateCategory(categoryId, name, ColorToHex(selectedColor))
+                        }
                         navController.popBackStack()
                     }
                 },
@@ -251,9 +280,11 @@ fun CategoryEditScreen(navController: NavHostController, viewModel: CategoryView
 class CategoryRepository(private val dao: CategoryDao) {
     suspend fun insert(category: Category) = dao.insertAll(category)
     suspend fun getAll() = dao.getAll()
+    suspend fun update(category: Category) = dao.update(category)
 }
 
 class CategoryViewModel(private val repository: CategoryRepository) : ViewModel() {
+
     var categories = mutableStateOf<List<Category>>(emptyList())
         private set
 
@@ -266,6 +297,18 @@ class CategoryViewModel(private val repository: CategoryRepository) : ViewModel(
     fun insertCategory(name: String, color: String) {
         viewModelScope.launch {
             repository.insert(Category(0, name, color))
+            loadCategories()
+        }
+    }
+
+    fun getCategoryById(id: Int): Category? {
+        return categories.value.find { it.categoryID == id }
+    }
+
+    fun updateCategory(id: Int, name: String, color: String) {
+        viewModelScope.launch {
+            val updated = Category(id, name, color)
+            repository.update(updated)
             loadCategories()
         }
     }
