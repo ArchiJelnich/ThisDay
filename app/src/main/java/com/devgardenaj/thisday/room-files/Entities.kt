@@ -10,6 +10,7 @@ data class Category(
     @PrimaryKey(autoGenerate = true) var categoryID: Int,
     @ColumnInfo(name = "categoryName") val categoryName: String,
     @ColumnInfo(name = "categoryColor") val categoryColor: String,
+    @ColumnInfo(name = "categoryDeletedFlag") val categoryDeletedFlag: Int,
 ) : Serializable
 
 @Entity(tableName = "InfoAboutDay")
@@ -20,6 +21,5 @@ data class InfoAboutDay(
     @ColumnInfo(name = "infoMonth") val infoMonth: Int,
     @ColumnInfo(name = "infoYear") val infoYear: Int,
     @ColumnInfo(name = "infoSum") val infoSum: Int,
-    @ColumnInfo(name = "infoDeletedFlag") val infoDeletedFlag: Int,
 )
 

@@ -39,6 +39,7 @@ import androidx.room.Room
 import com.devgardenaj.thisday.infra.CategoryColors
 import com.devgardenaj.thisday.room.CategoryDao
 import com.devgardenaj.thisday.room.*
+import com.devgardenaj.thisday.screens.BottomPanel
 import kotlinx.coroutines.launch
 
 
@@ -99,7 +100,11 @@ fun CategoryListScreen(navController: NavHostController, viewModel: CategoryView
             TopAppBar(
                 title = { Text(stringResource(R.string.category)) }
             )
-        },
+                    },
+        bottomBar = {
+            BottomPanel()
+        }
+
     ) { paddingValues ->
 
         Column(
@@ -279,24 +284,24 @@ fun CategoryEditScreen(navController: NavHostController, viewModel: CategoryView
 
 class CategoryRepository(private val dao: CategoryDao) {
     suspend fun insert(category: Category) = dao.insertAll(category)
-    suspend fun getAll() = dao.getAll()
+    suspend fun getAllNotDeleted() = dao.getAllNotDeleted()
     suspend fun update(category: Category) = dao.update(category)
 }
 
-class CategoryViewModel(private val repository: CategoryRepository) : ViewModel() {
+open class CategoryViewModel(private val repository: CategoryRepository) : ViewModel() {
 
     var categories = mutableStateOf<List<Category>>(emptyList())
         private set
 
     fun loadCategories() {
         viewModelScope.launch {
-            categories.value = repository.getAll()
+            categories.value = repository.getAllNotDeleted()
         }
     }
 
     fun insertCategory(name: String, color: String) {
         viewModelScope.launch {
-            repository.insert(Category(0, name, color))
+            repository.insert(Category(0, name, color, 0))
             loadCategories()
         }
     }
@@ -307,7 +312,7 @@ class CategoryViewModel(private val repository: CategoryRepository) : ViewModel(
 
     fun updateCategory(id: Int, name: String, color: String) {
         viewModelScope.launch {
-            val updated = Category(id, name, color)
+            val updated = Category(id, name, color, 0)
             repository.update(updated)
             loadCategories()
         }
