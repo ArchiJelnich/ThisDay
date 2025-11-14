@@ -24,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewModelScope
 import androidx.room.Room
+import com.devgardenaj.thisday.infra.localeChecker
 import com.devgardenaj.thisday.room.*
 import com.devgardenaj.thisday.screens.BottomPanel
 import kotlinx.coroutines.launch
@@ -48,6 +49,7 @@ class TodayActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
+        localeChecker(this)
         super.onCreate(savedInstanceState)
         setContent {
             TodayScreen(viewModel)

@@ -37,6 +37,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.Room
 import com.devgardenaj.thisday.infra.CategoryColors
+import com.devgardenaj.thisday.infra.localeChecker
 import com.devgardenaj.thisday.room.CategoryDao
 import com.devgardenaj.thisday.room.*
 import com.devgardenaj.thisday.screens.BottomPanel
@@ -56,6 +57,7 @@ class CategoryActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        localeChecker(this)
         super.onCreate(savedInstanceState)
         setContent {
             CategoryApp(viewModel)
@@ -296,6 +298,8 @@ open class CategoryViewModel(private val repository: CategoryRepository) : ViewM
     fun loadCategories() {
         viewModelScope.launch {
             categories.value = repository.getAllNotDeleted()
+            Log.d("MyDebug", "categories.va = " + categories.value)
+
         }
     }
 

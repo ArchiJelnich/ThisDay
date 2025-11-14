@@ -6,6 +6,9 @@
 
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -32,7 +35,15 @@
             android:name=".CategoryActivity"
             android:exported="true">
         </activity>
+        <activity
+            android:name=".SettingActivity"
+            android:exported="true">
+        </activity>
+
+        <receiver android:name=".infra.AlarmReceiver" />
 
     </application>
+
+
 
 </manifest>

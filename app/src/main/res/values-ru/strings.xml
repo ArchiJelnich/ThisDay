@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">ЭтотДень</string>
+    <string name="category">Категории</string>
+    <string name="category_name">Имя категории</string>
+    <string name="edit">Редактировать</string>
+    <string name="delete">Удалить</string>
+    <string name="add">Добавить</string>
+    <string name="color">Цвет</string>
+    <string name="today">Сегодня</string>
+    <string name="settings">Настройки</string>
+    <string name="language">Язык</string>
+    <string name="ru">ру</string>
+    <string name="eng">англ</string>
+    <string name="notification">Уведомления</string>
+    <string name="on">вкл</string>
+    <string name="off">выкл</string>
+    <string name="cancel">Отменить</string>
+    <string name="ok">Ок</string>
+    <string name="not_tittle">Это я!</string>
+    <string name="not_body">Хочешь что-то отметить?</string>
+</resources>
