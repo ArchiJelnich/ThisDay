@@ -1,5 +1,6 @@
 package com.devgardenaj.thisday
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -22,8 +23,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewModelScope
 import androidx.room.Room
+import com.devgardenaj.thisday.infra.dateToString
 import com.devgardenaj.thisday.infra.localeChecker
 import com.devgardenaj.thisday.room.*
 import com.devgardenaj.thisday.screens.BottomPanel
@@ -34,6 +38,8 @@ import java.time.LocalDate
 @RequiresApi(Build.VERSION_CODES.O)
 class TodayActivity : AppCompatActivity() {
 
+
+
     private val viewModel by lazy {
         val db = Room.databaseBuilder(
             applicationContext,
@@ -42,17 +48,35 @@ class TodayActivity : AppCompatActivity() {
         ).build()
         val repo = CategoryRepository(db.CategoryDao())
         val infoRepo = InfoRepository(db.InfoAboutDayDao())
-        val today = DateToCustomDate(LocalDate.now())
+
+        val extras = intent.extras
+        var asset = 0
+        if (extras != null) {
+            asset =  intent.extras?.get("asset") as Int
+        }
+        val myDay = LocalDate.now().plusDays(asset.toLong())
+
+        val today = DateToCustomDate(myDay)
+        Log.d("MyDebug", "today 1 = " + today)
+
+
 
         TodayViewModel(repo, infoRepo, today)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        val extras = intent.extras
+        var asset = 0
+        if (extras != null) {
+            asset =  intent.extras?.get("asset") as Int
+        }
+
         localeChecker(this)
         super.onCreate(savedInstanceState)
         setContent {
-            TodayScreen(viewModel)
+            TodayScreen(viewModel, asset)
         }
     }
 }
@@ -61,12 +85,12 @@ class TodayActivity : AppCompatActivity() {
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TodayScreen(viewModel: TodayViewModel) {
+fun TodayScreen(viewModel: TodayViewModel, asset: Int) {
     val categories by viewModel.categories
 
-
-
-
+    var newAsset = asset
+    val context = LocalContext.current
+    val dateForName = LocalDate.now().plusDays(asset.toLong())
 
     LaunchedEffect(Unit) {
         viewModel.loadCategories()
@@ -76,7 +100,49 @@ fun TodayScreen(viewModel: TodayViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.today)) }
+                title = {
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+                        Button(onClick = {
+                            newAsset--
+                            val intent = Intent(context, TodayActivity::class.java)
+                            intent.putExtra("asset", newAsset)
+                            context.startActivity(intent)
+                        }) { Text("<") }
+
+                        if (asset==0){
+                    Text(
+                        text = stringResource(R.string.today),
+                        style = MaterialTheme.typography.headlineLarge,
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Center
+                    )}
+                        else {
+                            Text(
+                                text = dateToString(dateForName),
+                                style = MaterialTheme.typography.headlineLarge,
+                                modifier = Modifier.weight(1f),
+                                textAlign = TextAlign.Center
+                            )
+
+                        }
+                    if (asset != 0){
+
+                    Button(onClick = {
+                        newAsset++
+                        val intent = Intent(context, TodayActivity::class.java)
+                        intent.putExtra("asset", newAsset)
+                        context.startActivity(intent)
+                    }) { Text(">") }
+                    }}
+
+
+
+                }
             )
         },
         bottomBar = {
@@ -84,6 +150,11 @@ fun TodayScreen(viewModel: TodayViewModel) {
         }
 
     ) { paddingValues ->
+
+
+
+
+
 
         Column(
             modifier = Modifier
@@ -183,7 +254,6 @@ class TodayViewModel(private val repository: CategoryRepository, private val inf
     fun loadInfo() {
         viewModelScope.launch {
             info.value = infoRepository.getInfoByDay(date.day, date.month, date.year)
-            Log.d("MyDebug", "load " +  info.value)
         }
     }
 

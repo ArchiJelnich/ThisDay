@@ -298,7 +298,6 @@ open class CategoryViewModel(private val repository: CategoryRepository) : ViewM
     fun loadCategories() {
         viewModelScope.launch {
             categories.value = repository.getAllNotDeleted()
-            Log.d("MyDebug", "categories.va = " + categories.value)
 
         }
     }
