@@ -57,7 +57,7 @@ class TodayActivity : AppCompatActivity() {
         val myDay = LocalDate.now().plusDays(asset.toLong())
 
         val today = DateToCustomDate(myDay)
-        Log.d("MyDebug", "today 1 = " + today)
+        //Log.d("MyDebug", "today 1 = " + today)
 
 
 
@@ -189,7 +189,11 @@ fun TodayScreen(viewModel: TodayViewModel, asset: Int) {
 @Composable
 fun CategoryRowCountable(category: CategoryTemp,  viewModel: TodayViewModel) {
 
+
+
     val infoList by viewModel.info
+    val totalSum = infoList.sumOf { it.infoSum }
+    val maxLimit = 24
     var count by remember { mutableIntStateOf(infoList.find { it.categoryID == category.categoryID }?.infoSum ?: 0) }
 
     Row(
@@ -229,10 +233,12 @@ fun CategoryRowCountable(category: CategoryTemp,  viewModel: TodayViewModel) {
                 }
             }) { Text("-") }
             Text(text = count.toString(), modifier = Modifier.padding(horizontal = 8.dp))
-            Button(onClick = {
-                count++
-                viewModel.updateCount(category.categoryID, count)
-            }) { Text("+") }
+            if (totalSum < maxLimit) {
+                Button(onClick = {
+                    count++
+                    viewModel.updateCount(category.categoryID, count)
+                }) { Text("+") }
+            }
         }
     }
 }

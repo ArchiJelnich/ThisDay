@@ -18,4 +18,7 @@
     <string name="ok">OK</string>
     <string name="not_tittle">Its me!</string>
     <string name="not_body">Want to mark something?</string>
+    <string name="graph">Graph</string>
+    <string name="month">Month</string>
+    <string name="year">Year</string>
 </resources>

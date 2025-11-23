@@ -22,6 +22,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.devgardenaj.thisday.CategoryActivity
+import com.devgardenaj.thisday.GraphActivity
 import com.devgardenaj.thisday.R
 import com.devgardenaj.thisday.SettingActivity
 import com.devgardenaj.thisday.TodayActivity
@@ -82,7 +83,7 @@ fun BottomPanel() {
                 .background(Color.White)
                 .clickable (
                     onClick = {
-                        //context.startActivity(Intent(context, CalendarActivity::class.java))
+                        context.startActivity(Intent(context, GraphActivity::class.java))
                     },)
         )
         {
