@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.devgardenaj.thisday.room.CategoryDao
 import com.devgardenaj.thisday.room.InfoAboutDayDao
 
@@ -23,7 +24,14 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "thisday_app_database"
-                ).build()
+                )
+                .addCallback(object : RoomDatabase.Callback() {
+                        override fun onCreate(db: SupportSQLiteDatabase) {
+                            super.onCreate(db)
+                            db.execSQL("UPDATE sqlite_sequence SET seq = 99 WHERE name = 'Category'")
+                        }
+                })
+                    .build()
                 INSTANCE = instance
                 instance
             }

@@ -246,6 +246,7 @@ fun CategoryRowCountable(category: CategoryTemp,  viewModel: TodayViewModel) {
 
 class InfoRepository(private val dao: InfoAboutDayDao) {
     suspend fun getInfoByDay(infoDay: Int, infoMonth: Int, infoYear: Int) = dao.getInfoByDay(infoDay, infoMonth, infoYear)
+    suspend fun getInfoByYear(infoYear: Int) = dao.getInfoByYear( infoYear)
     suspend fun updateInfo(infoSummary: InfoAboutDay) = dao.updateInfo(infoSummary)
     suspend fun insertInfo(infoSummary: InfoAboutDay) = dao.insertInfo(infoSummary)
     suspend fun getAll(infoDay: Int, infoMonth: Int, infoYear: Int) = dao.getAll(infoDay, infoMonth, infoYear)

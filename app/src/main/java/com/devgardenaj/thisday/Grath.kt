@@ -48,27 +48,50 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
+import androidx.room.Room
+import com.devgardenaj.thisday.infra.AvarageCount
+import com.devgardenaj.thisday.room.CustomDate
+import com.devgardenaj.thisday.room.DateToCustomDate
+import com.devgardenaj.thisday.room.InfoSummary
 import com.devgardenaj.thisday.screens.BottomPanel
 import kotlin.random.Random
 
+@RequiresApi(Build.VERSION_CODES.O)
 class GraphActivity : ComponentActivity() {
-    @RequiresApi(Build.VERSION_CODES.O)
+
+    private val viewModel by lazy {
+        val db = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java,
+            "category-db"
+        ).build()
+        val catRepo = CategoryRepository(db.CategoryDao())
+        val infoRepo = InfoRepository(db.InfoAboutDayDao())
+        val myDay = DateToCustomDate(LocalDate.now())
+
+        GrathViewModel(catRepo, infoRepo, myDay)
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         localeChecker(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    GraphScreen()
+                    GraphScreen(viewModel)
                 }
             }
     }
 }
 
 @Composable
-fun GraphScreen() {
+fun GraphScreen(viewModel : GrathViewModel) {
     var selectedView by remember { mutableStateOf("month") }
-    val context = LocalContext.current
+    //val context = LocalContext.current
+
+    AvarageCount(viewModel)
 
 
         Surface(
@@ -171,8 +194,17 @@ fun PeriodGrid(view: String) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewPeriodScreen() {
-    GraphScreen()
+
+
+class GrathViewModel(private val catRepo: CategoryRepository, private val infoRepository: InfoRepository, private val date : CustomDate) : CategoryViewModel(catRepo) {
+
+    var info = mutableStateOf<List<InfoAboutDay>>(emptyList())
+    val myDate = date
+
+    fun loadInfo() {
+        viewModelScope.launch {
+            info.value = infoRepository.getInfoByYear(date.year)
+        }
+    }
+
 }

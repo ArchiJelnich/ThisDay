@@ -27,6 +27,8 @@ interface CategoryDao {
 interface InfoAboutDayDao {
     @Query("SELECT iID, categoryID, infoSum FROM InfoAboutDay WHERE infoDay = :infoDay AND infoMonth = :infoMonth AND infoYear = :infoYear")
     suspend fun getInfoByDay(infoDay: Int, infoMonth: Int, infoYear: Int): List<InfoSummary>
+    @Query("SELECT * FROM InfoAboutDay WHERE infoYear = :infoYear")
+    suspend fun getInfoByYear(infoYear: Int): List<InfoAboutDay>
     @Update
     suspend fun updateInfo(infoDay: InfoAboutDay)
     @Insert
