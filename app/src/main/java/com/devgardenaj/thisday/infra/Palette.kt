@@ -22,3 +22,7 @@ val CategoryColors = listOf(
     Color(0xFF5C3093),
     Color(0xFF696969),
     )
+
+fun parseColor(colorString: String): Color {
+    return Color(android.graphics.Color.parseColor(colorString))
+}

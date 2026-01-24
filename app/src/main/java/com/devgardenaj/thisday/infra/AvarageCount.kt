@@ -6,6 +6,11 @@ import com.devgardenaj.thisday.InfoAboutDay
 import kotlin.math.roundToInt
 
 
+data class MonthAverage(
+    val month: Int,
+    val avgByCategory: Map<Int, Int>
+)
+
 fun AvarageCount(viewModel : GrathViewModel) {
 
 
@@ -13,9 +18,6 @@ fun AvarageCount(viewModel : GrathViewModel) {
 
     viewModel.loadCategories()
     viewModel.loadInfo()
-
-
-
 
 
     data class MonthInfo(
@@ -28,10 +30,7 @@ fun AvarageCount(viewModel : GrathViewModel) {
         val sumsByCategory: Map<Int, Int>
     )
 
-    data class MonthAverage(
-        val month: Int,
-        val avgByCategory: Map<Int, Int>
-    )
+
 
     val groupedByMonth: List<MonthInfo> =
         (1..12).map { month ->
@@ -69,5 +68,7 @@ fun AvarageCount(viewModel : GrathViewModel) {
         }
 
     Log.d("AvarageCountDebug", "AvarageCount monthAverages = " + monthAverages)
+
+    viewModel.monthAverages.value = monthAverages
 
 }
