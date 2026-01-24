@@ -9,7 +9,7 @@ import kotlin.math.roundToInt
 fun AvarageCount(viewModel : GrathViewModel) {
 
 
-    val year = viewModel.myDate.year
+    val year = viewModel.newYear
 
     viewModel.loadCategories()
     viewModel.loadInfo()

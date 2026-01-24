@@ -69,27 +69,47 @@ class GraphActivity : ComponentActivity() {
         val catRepo = CategoryRepository(db.CategoryDao())
         val infoRepo = InfoRepository(db.InfoAboutDayDao())
         val myDay = DateToCustomDate(LocalDate.now())
+        val extras = intent.extras
+        var asset = 0
+        if (extras != null) {
+            asset =  intent.extras?.get("asset") as Int
+        }
+        var newYear = myDay.year+asset
 
-        GrathViewModel(catRepo, infoRepo, myDay)
+        GrathViewModel(catRepo, infoRepo, newYear)
     }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        val extras = intent.extras
+        var asset = 0
+        if (extras != null) {
+            asset =  intent.extras?.get("asset") as Int
+        }
+
+        var selectedView = "month"
+        if (extras != null) {
+            selectedView =  intent.extras?.get("view") as String
+        }
+
         localeChecker(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    GraphScreen(viewModel)
+                    GraphScreen(viewModel, asset, selectedView)
                 }
             }
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun GraphScreen(viewModel : GrathViewModel) {
-    var selectedView by remember { mutableStateOf("month") }
+fun GraphScreen(viewModel : GrathViewModel, asset: Int, selectedViewExtra : String) {
+    var selectedView by remember { mutableStateOf(selectedViewExtra) }
     //val context = LocalContext.current
+
 
     AvarageCount(viewModel)
 
@@ -121,7 +141,7 @@ fun GraphScreen(viewModel : GrathViewModel) {
 
 
                     Column(modifier = Modifier.weight(1f)) {
-                        PeriodContent(selectedView)
+                        PeriodContent(selectedView, asset)
                     }
 
 
@@ -131,18 +151,30 @@ fun GraphScreen(viewModel : GrathViewModel) {
             }
         }}
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun PeriodContent(view: String) {
+fun PeriodContent(view: String, asset : Int) {
+
+    Log.d("MyLog", "LocalDate.now().year" + LocalDate.now().year)
+    Log.d("MyLog", "asset" + asset)
+    var newAsset = asset
+    var newDate = LocalDate.now().year+asset
+    val context = LocalContext.current
+
     Column(modifier = Modifier
         .fillMaxWidth()
         .padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Button(onClick = {
-                /* TODO= */
+                newAsset--
+                val intent = Intent(context, GraphActivity::class.java)
+                intent.putExtra("asset", newAsset)
+                intent.putExtra("view", view)
+                context.startActivity(intent)
             }) { Text("<") }
             Text(text = when (view) {
                 "month" -> stringResource(R.string.month)
-                "year" -> stringResource(R.string.year)
+                "year" -> newDate.toString()
                 else -> ""
             },
                 style = MaterialTheme.typography.headlineMedium,
@@ -150,7 +182,11 @@ fun PeriodContent(view: String) {
                 textAlign = TextAlign.Center
             )
             Button(onClick = {
-                /* TODO= */
+                newAsset++
+                val intent = Intent(context, GraphActivity::class.java)
+                intent.putExtra("asset", newAsset)
+                intent.putExtra("view", view)
+                context.startActivity(intent)
             }) { Text(">") }
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -196,14 +232,13 @@ fun PeriodGrid(view: String) {
 
 
 
-class GrathViewModel(private val catRepo: CategoryRepository, private val infoRepository: InfoRepository, private val date : CustomDate) : CategoryViewModel(catRepo) {
+class GrathViewModel(private val catRepo: CategoryRepository, private val infoRepository: InfoRepository, val newYear : Int) : CategoryViewModel(catRepo) {
 
     var info = mutableStateOf<List<InfoAboutDay>>(emptyList())
-    val myDate = date
 
     fun loadInfo() {
         viewModelScope.launch {
-            info.value = infoRepository.getInfoByYear(date.year)
+            info.value = infoRepository.getInfoByYear(newYear)
         }
     }
 
