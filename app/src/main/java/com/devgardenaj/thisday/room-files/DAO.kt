@@ -29,6 +29,8 @@ interface InfoAboutDayDao {
     suspend fun getInfoByDay(infoDay: Int, infoMonth: Int, infoYear: Int): List<InfoSummary>
     @Query("SELECT * FROM InfoAboutDay WHERE infoYear = :infoYear")
     suspend fun getInfoByYear(infoYear: Int): List<InfoAboutDay>
+    @Query("SELECT * FROM InfoAboutDay WHERE infoMonth = :infoM AND infoYear = :infoYear")
+    suspend fun getInfoByYearM(infoM : Int, infoYear: Int): List<InfoAboutDay>
     @Update
     suspend fun updateInfo(infoDay: InfoAboutDay)
     @Insert

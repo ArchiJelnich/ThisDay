@@ -56,6 +56,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.room.Room
 import com.devgardenaj.thisday.infra.AvarageCount
 import com.devgardenaj.thisday.infra.MonthAverage
+import com.devgardenaj.thisday.infra.MonthCount
+import com.devgardenaj.thisday.infra.MonthInfo
 import com.devgardenaj.thisday.infra.dateMYToString
 import com.devgardenaj.thisday.infra.parseColor
 import com.devgardenaj.thisday.room.CustomDate
@@ -132,7 +134,7 @@ fun GraphScreen(viewModel : GrathViewModel, asset: Int, assetMY : Int, selectedV
         viewModel.loadInfo()
     }
     AvarageCount(viewModel)
-
+    MonthCount(viewModel)
 
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -255,16 +257,21 @@ fun PeriodGrid(    view: String,
     when (view) {
         "year" -> YearGrid(
             monthAverages = viewModel.monthAverages.value,
-
             categoryColors = viewModel.categoryColors
         )
-        "month" -> MonthGrid(dayOfm)
+        "month" -> MonthGrid(
+            monthAverages = viewModel.monthAverages.value,
+            categoryColors = viewModel.categoryColors,
+            dayOfm = dayOfm)
     }
 
 }
 
 @Composable
-fun MonthGrid(dayOfm : Int)
+fun MonthGrid(
+    monthAverages: List<MonthAverage>,
+    categoryColors: Map<Int, Color>,
+    dayOfm : Int)
 {
     Box(
         modifier = Modifier.fillMaxWidth(),
@@ -371,11 +378,19 @@ class GrathViewModel(private val catRepo: CategoryRepository, private val infoRe
         }
 
     var info = mutableStateOf<List<InfoAboutDay>>(emptyList())
+    var infoPerM = mutableStateOf<List<InfoAboutDay>>(emptyList())
     var monthAverages = mutableStateOf<List<MonthAverage>>(emptyList())
+    var monthInfo = mutableStateOf<List<MonthInfo>>(emptyList())
 
     fun loadInfo() {
         viewModelScope.launch {
             info.value = infoRepository.getInfoByYear(newYear)
+        }
+    }
+
+    fun loadPerMInfo() {
+        viewModelScope.launch {
+            infoPerM.value = infoRepository.getInfoByYearMonth(newMY.monthValue, newMY.year)
         }
     }
 
