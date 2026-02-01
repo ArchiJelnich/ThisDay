@@ -56,6 +56,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.room.Room
 import com.devgardenaj.thisday.infra.AvarageCount
 import com.devgardenaj.thisday.infra.MonthAverage
+import com.devgardenaj.thisday.infra.dateMYToString
 import com.devgardenaj.thisday.infra.parseColor
 import com.devgardenaj.thisday.room.CustomDate
 import com.devgardenaj.thisday.room.DateToCustomDate
@@ -77,12 +78,18 @@ class GraphActivity : ComponentActivity() {
         val myDay = DateToCustomDate(LocalDate.now())
         val extras = intent.extras
         var asset = 0
+        var assetMY = 0
         if (extras != null) {
             asset =  intent.extras?.get("asset") as Int
         }
-        var newYear = myDay.year+asset
+        if (extras != null) {
+            assetMY =  intent.extras?.get("assetMY") as Int
+        }
 
-        GrathViewModel(catRepo, infoRepo, newYear)
+        var newYear = myDay.year+asset
+        var newMY = LocalDate.now().plusMonths(assetMY.toLong())
+
+        GrathViewModel(catRepo, infoRepo, newYear, newMY)
     }
 
 
@@ -90,8 +97,12 @@ class GraphActivity : ComponentActivity() {
 
         val extras = intent.extras
         var asset = 0
+        var assetMY = 0
         if (extras != null) {
             asset =  intent.extras?.get("asset") as Int
+        }
+        if (extras != null) {
+            assetMY =  intent.extras?.get("assetMY") as Int
         }
 
         var selectedView = "month"
@@ -104,7 +115,7 @@ class GraphActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    GraphScreen(viewModel, asset, selectedView)
+                    GraphScreen(viewModel, asset, assetMY, selectedView)
                 }
             }
     }
@@ -112,7 +123,7 @@ class GraphActivity : ComponentActivity() {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun GraphScreen(viewModel : GrathViewModel, asset: Int, selectedViewExtra : String) {
+fun GraphScreen(viewModel : GrathViewModel, asset: Int, assetMY : Int, selectedViewExtra : String) {
     var selectedView by remember { mutableStateOf(selectedViewExtra) }
     //val context = LocalContext.current
 
@@ -150,7 +161,7 @@ fun GraphScreen(viewModel : GrathViewModel, asset: Int, selectedViewExtra : Stri
 
 
                     Column(modifier = Modifier.weight(1f)) {
-                        PeriodContent(selectedView, asset, viewModel)
+                        PeriodContent(selectedView, asset, assetMY, viewModel)
                     }
 
 
@@ -162,27 +173,43 @@ fun GraphScreen(viewModel : GrathViewModel, asset: Int, selectedViewExtra : Stri
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun PeriodContent(view: String, asset : Int, viewModel : ViewModel) {
+fun PeriodContent(view: String, asset : Int, assetMY: Int, viewModel : ViewModel) {
 
     Log.d("MyLog", "LocalDate.now().year" + LocalDate.now().year)
     Log.d("MyLog", "asset" + asset)
     var newAsset = asset
+    var newAssetMY = assetMY
+    var newDateMY = LocalDate.now().plusMonths(newAssetMY.toLong())
     var newDate = LocalDate.now().year+asset
     val context = LocalContext.current
+    var dayOfm = newDateMY.lengthOfMonth()
 
     Column(modifier = Modifier
         .fillMaxWidth()
         .padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Button(onClick = {
+                if (view == "year") {
                 newAsset--
                 val intent = Intent(context, GraphActivity::class.java)
                 intent.putExtra("asset", newAsset)
+                intent.putExtra("assetMY", 0)
                 intent.putExtra("view", view)
-                context.startActivity(intent)
+                context.startActivity(intent)}
+
+                if (view == "month") {
+                    newAssetMY--
+
+                    Log.d("MyAsset", newAssetMY.toString())
+                    val intent = Intent(context, GraphActivity::class.java)
+                    intent.putExtra("asset", 0)
+                    intent.putExtra("assetMY", newAssetMY)
+                    intent.putExtra("view", view)
+                    context.startActivity(intent)}
+
             }) { Text("<") }
             Text(text = when (view) {
-                "month" -> stringResource(R.string.month)
+                "month" -> dateMYToString(newDateMY)
                 "year" -> newDate.toString()
                 else -> ""
             },
@@ -191,22 +218,36 @@ fun PeriodContent(view: String, asset : Int, viewModel : ViewModel) {
                 textAlign = TextAlign.Center
             )
             Button(onClick = {
-                newAsset++
-                val intent = Intent(context, GraphActivity::class.java)
-                intent.putExtra("asset", newAsset)
-                intent.putExtra("view", view)
-                context.startActivity(intent)
+                if (view == "year") {
+                    newAsset++
+                    val intent = Intent(context, GraphActivity::class.java)
+                    intent.putExtra("asset", newAsset)
+                    intent.putExtra("assetMY", 0)
+                    intent.putExtra("view", view)
+                    context.startActivity(intent)}
+
+                if (view == "month") {
+                    newAssetMY++
+                    Log.d("MyAsset", newAssetMY.toString())
+                    val intent = Intent(context, GraphActivity::class.java)
+                    intent.putExtra("asset", 0)
+                    intent.putExtra("assetMY", newAssetMY)
+                    intent.putExtra("view", view)
+                    context.startActivity(intent)}
+
             }) { Text(">") }
         }
         Spacer(modifier = Modifier.height(8.dp))
-        PeriodGrid(view, viewModel as GrathViewModel)
+        PeriodGrid(view, viewModel as GrathViewModel, dayOfm)
 
     }
 }
 
 @Composable
 fun PeriodGrid(    view: String,
-                   viewModel: GrathViewModel) {
+                   viewModel: GrathViewModel,
+                   dayOfm : Int
+) {
 
     Log.d("MyLog", "Look here!" + viewModel.categories)
 
@@ -217,20 +258,20 @@ fun PeriodGrid(    view: String,
 
             categoryColors = viewModel.categoryColors
         )
-        "month" -> MonthGrid()
+        "month" -> MonthGrid(dayOfm)
     }
 
 }
 
 @Composable
-fun MonthGrid()
+fun MonthGrid(dayOfm : Int)
 {
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
         LazyRow {
-            items((1..31).toList()) { columnNumber ->
+            items((1..dayOfm).toList()) { columnNumber ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     repeat(24) {
                         Box(
@@ -261,7 +302,7 @@ fun YearGrid(
 ) {
     val blockSize = 17.dp
     val blockSpacing = 2.dp
-    val maxBlocks = 24   // 🔥 фиксированный максимум
+    val maxBlocks = 24
 
     val blockHeight = blockSize + blockSpacing
     val graphHeight = blockHeight * maxBlocks
@@ -322,7 +363,7 @@ fun YearGrid(
     }
 }
 
-class GrathViewModel(private val catRepo: CategoryRepository, private val infoRepository: InfoRepository, val newYear : Int) : CategoryViewModel(catRepo) {
+class GrathViewModel(private val catRepo: CategoryRepository, private val infoRepository: InfoRepository, val newYear : Int, val newMY : LocalDate) : CategoryViewModel(catRepo) {
 
     val categoryColors: Map<Int, Color>
         get() = categories.value.associate {

@@ -18,3 +18,18 @@ fun dateToString(date: LocalDate): String {
     val stringDate = date.dayOfMonth.toString()+"."+mounth+"."+date.year.toString()
     return stringDate
 }
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun dateMYToString(date: LocalDate): String {
+
+
+    var mounth = date.monthValue.toString()
+
+    if (date.monthValue<10)
+    {
+        mounth = "0" + date.monthValue.toString()
+    }
+
+    val stringDate = mounth+"."+date.year.toString()
+    return stringDate
+}
