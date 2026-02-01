@@ -55,6 +55,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.room.Room
 import com.devgardenaj.thisday.infra.AvarageCount
+import com.devgardenaj.thisday.infra.DayInfo
 import com.devgardenaj.thisday.infra.MonthAverage
 import com.devgardenaj.thisday.infra.MonthCount
 import com.devgardenaj.thisday.infra.MonthInfo
@@ -156,9 +157,47 @@ fun GraphScreen(viewModel : GrathViewModel, asset: Int, assetMY : Int, selectedV
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Button(onClick = { selectedView = "month" }) { Text(stringResource(R.string.month)) }
+                    Button(
+                        onClick = { selectedView = "month" },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor =
+                                if (selectedView == "month")
+                                    MaterialTheme.colorScheme.primary
+                                else
+                                    MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    ) {
+                        Text(
+                            stringResource(R.string.month),
+                            color =
+                                if (selectedView == "month")
+                                    MaterialTheme.colorScheme.onPrimary
+                                else
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
                     Spacer(modifier = Modifier.width(16.dp))
-                    Button(onClick = { selectedView = "year" }) { Text(stringResource(R.string.year)) }
+
+                    Button(
+                        onClick = { selectedView = "year" },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor =
+                                if (selectedView == "year")
+                                    MaterialTheme.colorScheme.primary
+                                else
+                                    MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    ) {
+                        Text(
+                            stringResource(R.string.year),
+                            color =
+                                if (selectedView == "year")
+                                    MaterialTheme.colorScheme.onPrimary
+                                else
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
 
 
@@ -260,7 +299,7 @@ fun PeriodGrid(    view: String,
             categoryColors = viewModel.categoryColors
         )
         "month" -> MonthGrid(
-            monthAverages = viewModel.monthAverages.value,
+            monthInfo = viewModel.monthInfo.value,
             categoryColors = viewModel.categoryColors,
             dayOfm = dayOfm)
     }
@@ -269,34 +308,75 @@ fun PeriodGrid(    view: String,
 
 @Composable
 fun MonthGrid(
-    monthAverages: List<MonthAverage>,
+    monthInfo: List<DayInfo>,
     categoryColors: Map<Int, Color>,
     dayOfm : Int)
 {
+    val blockSize = 17.dp
+    val blockSpacing = 2.dp
+    val maxBlocks = 24
+
+    val blockHeight = blockSize + blockSpacing
+    val graphHeight = blockHeight * maxBlocks
+
     Box(
         modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.BottomCenter
     ) {
-        LazyRow {
-            items((1..dayOfm).toList()) { columnNumber ->
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    repeat(24) {
-                        Box(
-                            modifier = Modifier
-                                .size(17.dp)
-                                .background(
-                                    Color(
-                                        Random.nextFloat(),
-                                        Random.nextFloat(),
-                                        Random.nextFloat(),
-                                        1f
+        LazyRow(
+            verticalAlignment = Alignment.Bottom
+        ) {
+            items(monthInfo) { dayInfo ->
+
+                val isToday = dayInfo.day == dayOfm
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+
+                    // Столбец фиксированной высоты
+                    Box(
+                        modifier = Modifier
+                            .height(graphHeight)
+                            .width(24.dp),
+                        contentAlignment = Alignment.BottomCenter
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            dayInfo.sumsByCategory.forEach { (categoryId, value) ->
+
+                                val color =
+                                    categoryColors[categoryId] ?: Color.LightGray
+
+                                repeat(value.coerceAtMost(maxBlocks)) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(blockSize)
+                                            .background(
+                                                color,
+                                                RoundedCornerShape(3.dp)
+                                            )
                                     )
-                                )
-                        )
+                                    Spacer(modifier = Modifier.height(blockSpacing))
+                                }
+                            }
+                        }
                     }
-                    Text(text = columnNumber.toString(), modifier = Modifier.padding(top = 4.dp))
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text = dayInfo.day.toString(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (isToday)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.onSurface
+                    )
                 }
-                Spacer(modifier = Modifier.width(4.dp))
+
+                Spacer(modifier = Modifier.width(8.dp))
             }
         }
     }
@@ -380,7 +460,7 @@ class GrathViewModel(private val catRepo: CategoryRepository, private val infoRe
     var info = mutableStateOf<List<InfoAboutDay>>(emptyList())
     var infoPerM = mutableStateOf<List<InfoAboutDay>>(emptyList())
     var monthAverages = mutableStateOf<List<MonthAverage>>(emptyList())
-    var monthInfo = mutableStateOf<List<MonthInfo>>(emptyList())
+    var monthInfo = mutableStateOf<List<DayInfo>>(emptyList())
 
     fun loadInfo() {
         viewModelScope.launch {

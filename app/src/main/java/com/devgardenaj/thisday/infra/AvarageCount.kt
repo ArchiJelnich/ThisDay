@@ -3,6 +3,8 @@ package com.devgardenaj.thisday.infra
 import android.util.Log
 import com.devgardenaj.thisday.GrathViewModel
 import com.devgardenaj.thisday.InfoAboutDay
+import java.time.YearMonth
+import java.util.Collections.list
 import kotlin.math.roundToInt
 
 
@@ -14,6 +16,11 @@ data class MonthAverage(
 data class MonthInfo(
     val month: Int,
     val infoByCategory: Map<Int, Int>
+)
+
+data class DayInfo(
+    val day: Int,
+    val sumsByCategory: Map<Int, Int>
 )
 
 fun AvarageCount(viewModel : GrathViewModel) {
@@ -61,7 +68,7 @@ fun AvarageCount(viewModel : GrathViewModel) {
         monthSummaries.map { monthSummary ->
 
             val daysInMonth =
-                java.time.YearMonth.of(year, monthSummary.month)
+                YearMonth.of(year, monthSummary.month)
                     .lengthOfMonth()
 
             MonthAverage(
@@ -72,7 +79,6 @@ fun AvarageCount(viewModel : GrathViewModel) {
             )
         }
 
-    Log.d("AvarageCountDebug", "AvarageCount monthAverages = " + monthAverages)
 
     viewModel.monthAverages.value = monthAverages
 
@@ -81,67 +87,32 @@ fun AvarageCount(viewModel : GrathViewModel) {
 fun MonthCount(viewModel : GrathViewModel)
 {
 
-    Log.d("AvarageCountDebug", "MonthCount!")
 
 
-    val year = viewModel.newMY.year
-    val month = viewModel.newMY.month
-
-    viewModel.loadCategories()
     viewModel.loadPerMInfo()
 
-
-    data class MonthInfo(
-        val month: Int,
-        val days: List<InfoAboutDay>
-    )
-
-    data class MonthSummary(
-        val month: Int,
-        val sumsByCategory: Map<Int, Int>
-    )
+    val year = viewModel.newMY.year
+    val month = viewModel.newMY.monthValue
 
 
+    val sourceList = viewModel.infoPerM.value
+    val daysInMonth = YearMonth.of(year, month).lengthOfMonth()
 
+    val presentCategories = sourceList.map { it.categoryID }.distinct()
 
-    //val groupedByMonth: List<MonthInfo> =
-    //    (1..12).map { month ->
-    //        MonthInfo(
-    //            month = month,
-    //            days = viewModel.info.value.filter { it.infoMonth == month }
-    //        )
-   //     }
+    val sumMap = sourceList
+        .groupBy { it.infoDay to it.categoryID }
+        .mapValues { (_, items) -> items.sumOf { it.infoSum } }
 
-    //val monthSummaries: List<MonthSummary> =
-    //    groupedByMonth.map { monthInfo ->
-    //        MonthSummary(
-    //            month = monthInfo.month,
-    //            sumsByCategory = monthInfo.days
-    //                .groupBy { it.categoryID }
-    //                .mapValues { (_, items) ->
-    //                    items.sumOf { it.infoSum }
-    //                }
-    //        )
-    //    }
+    val dayInfos = (1..daysInMonth).map { day ->
+        val sumsByCategory = presentCategories
+            .associateWith { category -> sumMap[day to category] ?: 0 }
+            .filterValues { it != 0 }
 
-    //val monthAverages: List<MonthAverage> =
-    //    monthSummaries.map { monthSummary ->
+        DayInfo(day = day, sumsByCategory = sumsByCategory)
+    }
 
-    //        val daysInMonth =
-    //            java.time.YearMonth.of(year, monthSummary.month)
-    //                .lengthOfMonth()
+    viewModel.monthInfo.value = dayInfos
 
-    //        MonthAverage(
-    //            month = monthSummary.month,
-    //            avgByCategory = monthSummary.sumsByCategory.mapValues { (_, sum) ->
-    //                maxOf(1, (sum.toDouble() / daysInMonth).roundToInt())
-    //            }
-    //        )
-    //    }
-
-    Log.d("AvarageCountDebug", "AvarageCount month" + viewModel.infoPerM.value)
-
-
-    //viewModel.monthInfo.value = monthInfo
 
 }
