@@ -46,7 +46,7 @@ class TodayActivity : AppCompatActivity() {
             AppDatabase::class.java,
             "category-db"
         ).build()
-        val repo = CategoryRepository(db.CategoryDao())
+        val repo = CategoryRepository(db.CategoryDao(), db.InfoAboutDayDao())
         val infoRepo = InfoRepository(db.InfoAboutDayDao())
 
         val extras = intent.extras

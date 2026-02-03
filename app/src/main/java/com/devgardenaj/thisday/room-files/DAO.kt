@@ -21,6 +21,8 @@ interface CategoryDao {
     fun deleteAll()
     @Update
     suspend fun update(category: Category)
+    @Query("DELETE FROM Category WHERE categoryID = :categoryID")
+    suspend fun deleteCategoryByID(categoryID: Int)
 }
 
 @Dao
@@ -39,6 +41,10 @@ interface InfoAboutDayDao {
     suspend fun getAll(infoDay: Int, infoMonth: Int, infoYear: Int): List<InfoAboutDay>
     @Query("DELETE FROM InfoAboutDay")
     fun deleteAll()
+
+    @Query("DELETE FROM InfoAboutDay WHERE categoryID = :categoryID")
+    suspend fun deleteInfoByID(categoryID: Int)
+
 }
 
 data class InfoSummary(

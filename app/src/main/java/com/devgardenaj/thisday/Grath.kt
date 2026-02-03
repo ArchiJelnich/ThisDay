@@ -76,7 +76,7 @@ class GraphActivity : ComponentActivity() {
             AppDatabase::class.java,
             "category-db"
         ).build()
-        val catRepo = CategoryRepository(db.CategoryDao())
+        val catRepo = CategoryRepository(db.CategoryDao(), db.InfoAboutDayDao())
         val infoRepo = InfoRepository(db.InfoAboutDayDao())
         val myDay = DateToCustomDate(LocalDate.now())
         val extras = intent.extras

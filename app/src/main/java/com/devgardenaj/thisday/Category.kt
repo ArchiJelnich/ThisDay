@@ -33,6 +33,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.Room
@@ -52,7 +53,7 @@ class CategoryActivity : AppCompatActivity() {
             AppDatabase::class.java,
             "category-db"
         ).build()
-        val repo = CategoryRepository(db.CategoryDao())
+        val repo = CategoryRepository(db.CategoryDao(), db.InfoAboutDayDao())
         CategoryViewModel(repo)
     }
 
@@ -92,6 +93,7 @@ fun CategoryApp(viewModel: CategoryViewModel) {
 @Composable
 fun CategoryListScreen(navController: NavHostController, viewModel: CategoryViewModel) {
     val categories by viewModel.categories
+    var categoryToDelete by remember { mutableStateOf<Category?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.loadCategories()
@@ -129,7 +131,11 @@ fun CategoryListScreen(navController: NavHostController, viewModel: CategoryView
                             category.categoryColor
                         ),
                         onEdit = { navController.navigate("edit/${category.categoryID}") },
-                        onDelete = { }
+                        onDelete = {
+
+                            categoryToDelete = category
+
+                        }
                     )
                     Divider()
                 }
@@ -146,6 +152,23 @@ fun CategoryListScreen(navController: NavHostController, viewModel: CategoryView
                 }
             }
         }
+
+
+        if (categoryToDelete != null) {
+            DeleteWithDialog(
+                category = categoryToDelete!!,
+                onConfirm = {
+                    viewModel.deleteCategory(categoryToDelete!!.categoryID)
+                    Log.d("LogLog","Yes!")
+                    categoryToDelete = null
+                },
+                onDismiss = {
+                    Log.d("LogLog","No!")
+                    categoryToDelete = null
+                }
+            )
+        }
+
     }
 }
 
@@ -275,19 +298,68 @@ fun CategoryEditScreen(navController: NavHostController, viewModel: CategoryView
                                         selectedColor = color
                                         showColorPicker = false
                                     }
+
+
+
+
                             )
+
+
+
+
                         }
+
+
+
                     }
+
+
+
                 }
+
+
+
             }
+
+
+
         }
+
+
+
     }
 }
 
-class CategoryRepository(private val dao: CategoryDao) {
+@Composable
+fun DeleteWithDialog(
+    category: Category,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.delete_q)) },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                onConfirm()
+            }) {
+                Text(stringResource(R.string.ok))
+            }
+        }
+    )
+}
+
+class CategoryRepository(private val dao: CategoryDao, private val infoDao: InfoAboutDayDao) {
     suspend fun insert(category: Category) = dao.insertAll(category)
     suspend fun getAllNotDeleted() = dao.getAllNotDeleted()
     suspend fun update(category: Category) = dao.update(category)
+    suspend fun deleteCategoryByID(id : Int) = dao.deleteCategoryByID(id)
+    suspend fun deleteInfoByID(id : Int) = infoDao.deleteInfoByID(id)
 }
 
 open class CategoryViewModel(private val repository: CategoryRepository) : ViewModel() {
@@ -307,6 +379,17 @@ open class CategoryViewModel(private val repository: CategoryRepository) : ViewM
             repository.insert(Category(0, name, color, 0))
             loadCategories()
         }
+    }
+
+    fun deleteCategory(id : Int)
+    {
+        viewModelScope.launch {
+            repository.deleteCategoryByID(id)
+            repository.deleteInfoByID(id)
+            loadCategories()
+        }
+
+
     }
 
     fun getCategoryById(id: Int): Category? {
