@@ -55,6 +55,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.room.Room
 import com.devgardenaj.thisday.infra.AvarageCount
+import com.devgardenaj.thisday.infra.CategoryColors
 import com.devgardenaj.thisday.infra.DayInfo
 import com.devgardenaj.thisday.infra.MonthAverage
 import com.devgardenaj.thisday.infra.MonthCount
@@ -344,19 +345,16 @@ fun MonthGrid(
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            dayInfo.sumsByCategory.forEach { (categoryId, value) ->
+                            val orderedData = remember(dayInfo, categoryColors) {
+                                reorderByRainbow(dayInfo.sumsByCategory, categoryColors)
+                            }
 
-                                val color =
-                                    categoryColors[categoryId] ?: Color.LightGray
-
+                            orderedData.forEach { (color, value) ->
                                 repeat(value.coerceAtMost(maxBlocks)) {
                                     Box(
                                         modifier = Modifier
                                             .size(blockSize)
-                                            .background(
-                                                color,
-                                                RoundedCornerShape(3.dp)
-                                            )
+                                            .background(color, RoundedCornerShape(3.dp))
                                     )
                                     Spacer(modifier = Modifier.height(blockSpacing))
                                 }
@@ -417,20 +415,19 @@ fun YearGrid(
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            monthData.avgByCategory.forEach { (categoryId, value) ->
-                                val color =
-                                    categoryColors[categoryId] ?: Color.LightGray
+                            val orderedData = remember(monthData, categoryColors) {
+                                reorderByRainbow(monthData.avgByCategory, categoryColors)
+                            }
 
+                            orderedData.forEach { (color, value) ->
                                 repeat(value.coerceAtMost(maxBlocks)) {
                                     Box(
                                         modifier = Modifier
                                             .size(blockSize)
-                                            .background(
-                                                color,
-                                                RoundedCornerShape(3.dp)
-                                            )
+                                            .background(color, RoundedCornerShape(3.dp))
                                     )
                                     Spacer(modifier = Modifier.height(blockSpacing))
+
                                 }
                             }
                         }
@@ -448,6 +445,26 @@ fun YearGrid(
             }
         }
     }
+}
+
+
+fun reorderByRainbow(
+    values: Map<Int, Int>,
+    categoryColors: Map<Int, Color>
+): List<Pair<Color, Int>> {
+
+    val rainbowIndex = CategoryColors
+        .withIndex()
+        .associate { it.value to it.index }
+
+    return values
+        .mapNotNull { (categoryId, value) ->
+            val color = categoryColors[categoryId] ?: return@mapNotNull null
+            color to value
+        }
+        .sortedBy { (color, _) ->
+            rainbowIndex[color] ?: Int.MAX_VALUE
+        }
 }
 
 class GrathViewModel(private val catRepo: CategoryRepository, private val infoRepository: InfoRepository, val newYear : Int, val newMY : LocalDate) : CategoryViewModel(catRepo) {
