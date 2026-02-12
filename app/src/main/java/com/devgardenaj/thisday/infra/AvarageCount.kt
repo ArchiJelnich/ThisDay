@@ -1,6 +1,7 @@
 package com.devgardenaj.thisday.infra
 
 import android.util.Log
+import com.devgardenaj.thisday.Category
 import com.devgardenaj.thisday.GrathViewModel
 import com.devgardenaj.thisday.InfoAboutDay
 import java.time.YearMonth
@@ -23,13 +24,14 @@ data class DayInfo(
     val sumsByCategory: Map<Int, Int>
 )
 
-fun AvarageCount(viewModel : GrathViewModel) {
+fun AvarageCount(viewModel : GrathViewModel, chosenCat : Category) {
 
 
     val year = viewModel.newYear
 
+    Log.d("MyDebugs", "Stage 5")
     viewModel.loadCategories()
-    viewModel.loadInfo()
+    viewModel.loadInfo(chosenCat.categoryID)
 
 
     data class MonthInfo(
@@ -84,12 +86,12 @@ fun AvarageCount(viewModel : GrathViewModel) {
 
 }
 
-fun MonthCount(viewModel : GrathViewModel)
+fun MonthCount(viewModel : GrathViewModel, chosenCat : Category)
 {
 
 
-
-    viewModel.loadPerMInfo()
+    Log.d("MyDebugs", "Stage 4")
+    viewModel.loadPerMInfo(chosenCat.categoryID)
 
     val year = viewModel.newMY.year
     val month = viewModel.newMY.monthValue
