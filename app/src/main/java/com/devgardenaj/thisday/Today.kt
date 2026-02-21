@@ -31,6 +31,7 @@ import com.devgardenaj.thisday.infra.dateToString
 import com.devgardenaj.thisday.infra.localeChecker
 import com.devgardenaj.thisday.room.*
 import com.devgardenaj.thisday.screens.BottomPanel
+import com.devgardenaj.thisday.widget.forceWidgetUpdate
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -41,11 +42,7 @@ class TodayActivity : AppCompatActivity() {
 
 
     private val viewModel by lazy {
-        val db = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java,
-            "category-db"
-        ).build()
+        val db = AppDatabase.getInstance(applicationContext)
         val repo = CategoryRepository(db.CategoryDao(), db.InfoAboutDayDao())
         val infoRepo = InfoRepository(db.InfoAboutDayDao())
 
@@ -195,6 +192,7 @@ fun CategoryRowCountable(category: CategoryTemp,  viewModel: TodayViewModel) {
     val totalSum = infoList.sumOf { it.infoSum }
     val maxLimit = 24
     var count by remember { mutableIntStateOf(infoList.find { it.categoryID == category.categoryID }?.infoSum ?: 0) }
+    val context = LocalContext.current
 
     Row(
         modifier = Modifier
@@ -230,6 +228,7 @@ fun CategoryRowCountable(category: CategoryTemp,  viewModel: TodayViewModel) {
                 if (count > 0) {
                     count--
                     viewModel.updateCount(category.categoryID, count)
+                    forceWidgetUpdate(context)
                 }
             }) { Text("-") }
             Text(text = count.toString(), modifier = Modifier.padding(horizontal = 8.dp))
@@ -237,6 +236,7 @@ fun CategoryRowCountable(category: CategoryTemp,  viewModel: TodayViewModel) {
                 Button(onClick = {
                     count++
                     viewModel.updateCount(category.categoryID, count)
+                    forceWidgetUpdate(context)
                 }) { Text("+") }
             }
         }

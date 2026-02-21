@@ -17,6 +17,10 @@ interface CategoryDao {
     suspend  fun insertAll(vararg category: Category)
     @Query("SELECT * FROM Category WHERE categoryID = :categoryID")
      suspend fun getCategoryByID(categoryID: Int): List<Category>
+
+    @Query("SELECT categoryColor FROM Category WHERE categoryID = :categoryID")
+    suspend fun getColorByID(categoryID: Int): String
+
     @Query("DELETE FROM Category")
     fun deleteAll()
     @Update
@@ -45,7 +49,8 @@ interface InfoAboutDayDao {
     suspend fun getAll(infoDay: Int, infoMonth: Int, infoYear: Int): List<InfoAboutDay>
     @Query("DELETE FROM InfoAboutDay")
     fun deleteAll()
-
+    @Query("SELECT * FROM InfoAboutDay")
+    suspend fun getAllInfo(): List<InfoAboutDay>
     @Query("DELETE FROM InfoAboutDay WHERE categoryID = :categoryID")
     suspend fun deleteInfoByID(categoryID: Int)
 

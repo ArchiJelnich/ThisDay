@@ -42,17 +42,16 @@ import com.devgardenaj.thisday.infra.localeChecker
 import com.devgardenaj.thisday.room.CategoryDao
 import com.devgardenaj.thisday.room.*
 import com.devgardenaj.thisday.screens.BottomPanel
+import com.devgardenaj.thisday.widget.WidgetProvider
+import com.devgardenaj.thisday.widget.WidgetProvider.Companion.updateWidget
+import com.devgardenaj.thisday.widget.forceWidgetUpdate
 import kotlinx.coroutines.launch
 
 
 class CategoryActivity : AppCompatActivity() {
 
     private val viewModel by lazy {
-        val db = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java,
-            "category-db"
-        ).build()
+        val db = AppDatabase.getInstance(applicationContext)
         val repo = CategoryRepository(db.CategoryDao(), db.InfoAboutDayDao())
         CategoryViewModel(repo)
     }
@@ -218,6 +217,7 @@ fun CategoryEditScreen(navController: NavHostController, viewModel: CategoryView
     var name by remember { mutableStateOf("") }
     var selectedColor by remember { mutableStateOf(colors[0]) }
     var showColorPicker by remember { mutableStateOf(false) }
+    var context = LocalContext.current
 
     LaunchedEffect(categoryId) {
         if (categoryId != null && categoryId != 0) {
@@ -240,6 +240,7 @@ fun CategoryEditScreen(navController: NavHostController, viewModel: CategoryView
                         } else {
                             viewModel.updateCategory(categoryId, name, ColorToHex(selectedColor))
                         }
+
                         navController.popBackStack()
                     }
                 },

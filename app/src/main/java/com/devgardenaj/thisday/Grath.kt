@@ -89,11 +89,7 @@ import kotlin.random.Random
 class GraphActivity : ComponentActivity() {
 
     private val viewModel by lazy {
-        val db = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java,
-            "category-db"
-        ).build()
+        val db = AppDatabase.getInstance(applicationContext)
         val catRepo = CategoryRepository(db.CategoryDao(), db.InfoAboutDayDao())
         val infoRepo = InfoRepository(db.InfoAboutDayDao())
         val myDay = DateToCustomDate(LocalDate.now())
