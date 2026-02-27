@@ -4,6 +4,7 @@ package com.devgardenaj.thisday.infra
 import android.content.Context
 import android.preference.PreferenceManager
 import java.util.Locale
+import androidx.core.content.edit
 
 fun localeChecker(context: Context) {
     val language = loadLanguage(context)
@@ -15,7 +16,7 @@ fun localeChecker(context: Context) {
 
 fun saveLanguage(context: Context, languageCode: String) {
     val preferences = PreferenceManager.getDefaultSharedPreferences(context)
-    preferences.edit().putString("settings_language", languageCode).apply()
+    preferences.edit { putString("settings_language", languageCode) }
 }
 
 fun loadLanguage(context: Context): String? {

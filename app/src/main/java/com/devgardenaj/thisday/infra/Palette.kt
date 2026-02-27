@@ -1,6 +1,7 @@
 package com.devgardenaj.thisday.infra
 
 import androidx.compose.ui.graphics.Color
+import androidx.core.graphics.toColorInt
 
 val CategoryColors = listOf(
     Color(0xFFFF4330),
@@ -24,5 +25,5 @@ val CategoryColors = listOf(
     )
 
 fun parseColor(colorString: String): Color {
-    return Color(android.graphics.Color.parseColor(colorString))
+    return Color(colorString.toColorInt())
 }

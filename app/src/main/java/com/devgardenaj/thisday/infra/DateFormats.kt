@@ -1,4 +1,4 @@
-package com.devgardenaj.thisday.room
+package com.devgardenaj.thisday.infra
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -7,7 +7,7 @@ import java.time.Month
 
 
 @RequiresApi(Build.VERSION_CODES.O)
-fun DateToCustomDate(date: LocalDate) : CustomDate
+fun dateToCustomDate(date: LocalDate) : CustomDate
 {
     val year = date.year
     val day = date.dayOfMonth

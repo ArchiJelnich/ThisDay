@@ -1,4 +1,4 @@
-package com.devgardenaj.thisday
+package com.devgardenaj.thisday.room
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

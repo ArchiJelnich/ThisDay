@@ -7,12 +7,10 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.os.Build
-import android.util.Log
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
-import com.devgardenaj.thisday.AppDatabase
+import com.devgardenaj.thisday.room.AppDatabase
 import com.devgardenaj.thisday.R
 import com.devgardenaj.thisday.infra.localeChecker
 import kotlinx.coroutines.CoroutineScope
@@ -20,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
+import androidx.core.graphics.toColorInt
 
 class WidgetProvider : AppWidgetProvider() {
 
@@ -37,11 +36,7 @@ class WidgetProvider : AppWidgetProvider() {
             localeChecker(context)
 
             val safeContext =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    context.createDeviceProtectedStorageContext()
-                } else {
-                    context
-                }
+                context.createDeviceProtectedStorageContext()
 
             val db = AppDatabase.getInstance(safeContext)
             val today = LocalDate.now()
@@ -61,15 +56,6 @@ class WidgetProvider : AppWidgetProvider() {
             }
 
 
-            Log.d("MyDebugWid", "info= " + info)
-            Log.d("MyDebugWid", "topID=" + topID)
-
-            Log.d("MyDebugWid", "color=" + db.CategoryDao().getColorByID(topID))
-
-            //val count = db.PlantDao().getCount()
-
-
-
 
             withContext(Dispatchers.Main) {
                 for (widgetId in appWidgetIds) {
@@ -87,11 +73,8 @@ class WidgetProvider : AppWidgetProvider() {
 
 
 
-            //val colorRes = if (hasData) R.drawable.circle_shape_green else R.drawable.circle_shape
-            val colorRes = R.drawable.circle_shape
 
-            val colorInt = Color.parseColor(topcolor)
-                //context.getColor(R.color.app_green)
+            val colorInt = topcolor.toColorInt()
 
 
             remoteViews.setInt(

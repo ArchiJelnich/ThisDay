@@ -1,11 +1,11 @@
 package com.devgardenaj.thisday.infra
 
-import android.util.Log
-import com.devgardenaj.thisday.Category
-import com.devgardenaj.thisday.GrathViewModel
-import com.devgardenaj.thisday.InfoAboutDay
+import android.os.Build
+import androidx.annotation.RequiresApi
+import com.devgardenaj.thisday.room.Category
+import com.devgardenaj.thisday.GraphViewModel
+import com.devgardenaj.thisday.room.InfoAboutDay
 import java.time.YearMonth
-import java.util.Collections.list
 import kotlin.math.roundToInt
 
 
@@ -14,22 +14,16 @@ data class MonthAverage(
     val avgByCategory: Map<Int, Int>
 )
 
-data class MonthInfo(
-    val month: Int,
-    val infoByCategory: Map<Int, Int>
-)
 
 data class DayInfo(
     val day: Int,
     val sumsByCategory: Map<Int, Int>
 )
 
-fun AvarageCount(viewModel : GrathViewModel, chosenCat : Category) {
-
+@RequiresApi(Build.VERSION_CODES.O)
+fun averageCount(viewModel : GraphViewModel, chosenCat : Category) {
 
     val year = viewModel.newYear
-
-    Log.d("MyDebugs", "Stage 5")
     viewModel.loadCategories()
     viewModel.loadInfo(chosenCat.categoryID)
 
@@ -43,7 +37,6 @@ fun AvarageCount(viewModel : GrathViewModel, chosenCat : Category) {
         val month: Int,
         val sumsByCategory: Map<Int, Int>
     )
-
 
 
     val groupedByMonth: List<MonthInfo> =
@@ -86,11 +79,10 @@ fun AvarageCount(viewModel : GrathViewModel, chosenCat : Category) {
 
 }
 
-fun MonthCount(viewModel : GrathViewModel, chosenCat : Category)
+@RequiresApi(Build.VERSION_CODES.O)
+fun monthCount(viewModel : GraphViewModel, chosenCat : Category)
 {
 
-
-    Log.d("MyDebugs", "Stage 4")
     viewModel.loadPerMInfo(chosenCat.categoryID)
 
     val year = viewModel.newMY.year

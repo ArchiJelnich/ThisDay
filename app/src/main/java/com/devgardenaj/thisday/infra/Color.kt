@@ -1,8 +1,8 @@
-package com.devgardenaj.thisday
+package com.devgardenaj.thisday.infra
 
 import androidx.compose.ui.graphics.Color
 
-fun ColorToHex(color : Color): String {
+fun colorToHex(color : Color): String {
 
 
     val hex = String.format("#%02X%02X%02X",

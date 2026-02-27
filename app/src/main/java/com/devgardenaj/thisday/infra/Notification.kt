@@ -9,10 +9,8 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.os.Build
-import android.preference.PreferenceManager
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import com.devgardenaj.thisday.AppDatabase
 import com.devgardenaj.thisday.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

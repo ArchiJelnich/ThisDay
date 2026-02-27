@@ -8,14 +8,14 @@ import java.time.LocalDate
 fun dateToString(date: LocalDate): String {
 
 
-    var mounth = date.monthValue.toString()
+    var month = date.monthValue.toString()
 
     if (date.monthValue<10)
     {
-        mounth = "0" + date.monthValue.toString()
+        month = "0" + date.monthValue.toString()
     }
 
-    val stringDate = date.dayOfMonth.toString()+"."+mounth+"."+date.year.toString()
+    val stringDate = date.dayOfMonth.toString()+"."+month+"."+date.year.toString()
     return stringDate
 }
 
@@ -23,13 +23,13 @@ fun dateToString(date: LocalDate): String {
 fun dateMYToString(date: LocalDate): String {
 
 
-    var mounth = date.monthValue.toString()
+    var month = date.monthValue.toString()
 
     if (date.monthValue<10)
     {
-        mounth = "0" + date.monthValue.toString()
+        month = "0" + date.monthValue.toString()
     }
 
-    val stringDate = mounth+"."+date.year.toString()
+    val stringDate = month+"."+date.year.toString()
     return stringDate
 }

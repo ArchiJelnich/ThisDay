@@ -1,10 +1,8 @@
 package com.devgardenaj.thisday
 
 import android.content.Intent
-import android.icu.util.Calendar
 import android.os.Build
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -12,20 +10,16 @@ import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.*
 import com.devgardenaj.thisday.infra.localeChecker
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,20 +28,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Button
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -59,31 +47,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.room.Room
-import com.devgardenaj.thisday.infra.AvarageCount
+import com.devgardenaj.thisday.infra.averageCount
 import com.devgardenaj.thisday.infra.CategoryColors
 import com.devgardenaj.thisday.infra.DayInfo
 import com.devgardenaj.thisday.infra.MonthAverage
-import com.devgardenaj.thisday.infra.MonthCount
-import com.devgardenaj.thisday.infra.MonthInfo
+import com.devgardenaj.thisday.infra.monthCount
 import com.devgardenaj.thisday.infra.dateMYToString
-import com.devgardenaj.thisday.infra.parseColor
-import com.devgardenaj.thisday.room.CustomDate
-import com.devgardenaj.thisday.room.DateToCustomDate
-import com.devgardenaj.thisday.room.InfoSummary
+import com.devgardenaj.thisday.infra.dateToCustomDate
 import com.devgardenaj.thisday.screens.BottomPanel
-import kotlin.random.Random
+import androidx.core.graphics.toColorInt
+import com.devgardenaj.thisday.room.AppDatabase
+import com.devgardenaj.thisday.room.Category
 
 @RequiresApi(Build.VERSION_CODES.O)
 class GraphActivity : ComponentActivity() {
@@ -92,7 +73,7 @@ class GraphActivity : ComponentActivity() {
         val db = AppDatabase.getInstance(applicationContext)
         val catRepo = CategoryRepository(db.CategoryDao(), db.InfoAboutDayDao())
         val infoRepo = InfoRepository(db.InfoAboutDayDao())
-        val myDay = DateToCustomDate(LocalDate.now())
+        val myDay = dateToCustomDate(LocalDate.now())
         val extras = intent.extras
         var asset = 0
         var assetMY = 0
@@ -106,7 +87,7 @@ class GraphActivity : ComponentActivity() {
         var newYear = myDay.year+asset
         var newMY = LocalDate.now().plusMonths(assetMY.toLong())
 
-        GrathViewModel(catRepo, infoRepo, newYear, newMY)
+        GraphViewModel(catRepo, infoRepo, newYear, newMY)
     }
 
 
@@ -140,18 +121,18 @@ class GraphActivity : ComponentActivity() {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun GraphScreen(viewModel : GrathViewModel, asset: Int, assetMY : Int, selectedViewExtra : String) {
+fun GraphScreen(viewModel : GraphViewModel, asset: Int, assetMY : Int, selectedViewExtra : String) {
     var selectedView by remember { mutableStateOf(selectedViewExtra) }
     var showFilterPicker by remember { mutableStateOf(false) }
-    //val context = LocalContext.current
-    val colors = CategoryColors
     val categories by viewModel.categories
-    var chosenCategory by remember { mutableStateOf(Category(
-        categoryID = -1,
-        categoryName = "null",
-        categoryColor = "null",
-        categoryDeletedFlag = 0,
-    )) }
+    var chosenCategory by remember { mutableStateOf(
+        Category(
+            categoryID = -1,
+            categoryName = "null",
+            categoryColor = "null",
+            categoryDeletedFlag = 0,
+        )
+    ) }
     var filterApplied by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -160,8 +141,8 @@ fun GraphScreen(viewModel : GrathViewModel, asset: Int, assetMY : Int, selectedV
         viewModel.loadCategories()
         viewModel.loadInfo(chosenCategory.categoryID)
     }
-    AvarageCount(viewModel, chosenCategory)
-    MonthCount(viewModel, chosenCategory)
+    averageCount(viewModel, chosenCategory)
+    monthCount(viewModel, chosenCategory)
 
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -238,7 +219,7 @@ fun GraphScreen(viewModel : GrathViewModel, asset: Int, assetMY : Int, selectedV
                             .then(
                                 if (filterApplied)
                                     Modifier.background(
-                                        Color(android.graphics.Color.parseColor(chosenCategory.categoryColor)),
+                                        Color(chosenCategory.categoryColor.toColorInt()),
                                         CircleShape
                                     )
                                         else
@@ -311,9 +292,7 @@ fun GraphScreen(viewModel : GrathViewModel, asset: Int, assetMY : Int, selectedV
                                                 .clip(CircleShape)
                                                 .background(
                                                     Color(
-                                                        android.graphics.Color.parseColor(
-                                                            category.categoryColor
-                                                        )
+                                                        category.categoryColor.toColorInt()
                                                     )
                                                 )
                                         )
@@ -345,14 +324,12 @@ fun GraphScreen(viewModel : GrathViewModel, asset: Int, assetMY : Int, selectedV
 @Composable
 fun PeriodContent(view: String, asset : Int, assetMY: Int, viewModel : ViewModel) {
 
-    Log.d("MyLog", "LocalDate.now().year" + LocalDate.now().year)
-    Log.d("MyLog", "asset" + asset)
     var newAsset = asset
     var newAssetMY = assetMY
-    var newDateMY = LocalDate.now().plusMonths(newAssetMY.toLong())
-    var newDate = LocalDate.now().year+asset
+    val newDateMY = LocalDate.now().plusMonths(newAssetMY.toLong())
+    val newDate = LocalDate.now().year+asset
     val context = LocalContext.current
-    var dayOfm = newDateMY.lengthOfMonth()
+    val dayOfm = newDateMY.lengthOfMonth()
 
     Column(modifier = Modifier
         .fillMaxWidth()
@@ -408,15 +385,15 @@ fun PeriodContent(view: String, asset : Int, assetMY: Int, viewModel : ViewModel
             }) { Text(">") }
         }
         Spacer(modifier = Modifier.height(8.dp))
-        PeriodGrid(view, viewModel as GrathViewModel, dayOfm)
+        PeriodGrid(view, viewModel as GraphViewModel, dayOfm)
 
     }
 }
 
 @Composable
-fun PeriodGrid(    view: String,
-                   viewModel: GrathViewModel,
-                   dayOfm : Int
+fun PeriodGrid(view: String,
+               viewModel: GraphViewModel,
+               dayOfm : Int
 ) {
 
     Log.d("MyLog", "Look here!" + viewModel.categories)
@@ -596,41 +573,3 @@ fun reorderByRainbow(
         }
 }
 
-class GrathViewModel(private val catRepo: CategoryRepository, private val infoRepository: InfoRepository, val newYear : Int, val newMY : LocalDate) : CategoryViewModel(catRepo) {
-
-    val categoryColors: Map<Int, Color>
-        get() = categories.value.associate {
-            it.categoryID to parseColor(it.categoryColor)
-        }
-
-    var info = mutableStateOf<List<InfoAboutDay>>(emptyList())
-    var infoPerM = mutableStateOf<List<InfoAboutDay>>(emptyList())
-    var monthAverages = mutableStateOf<List<MonthAverage>>(emptyList())
-    var monthInfo = mutableStateOf<List<DayInfo>>(emptyList())
-
-    fun loadInfo(ID : Int) {
-        viewModelScope.launch {
-
-            Log.d("MyDebugs", "loadInfo ID=" + ID)
-
-            if (ID == -1)
-                info.value = infoRepository.getInfoByYear(newYear)
-            else
-                info.value = infoRepository.getInfoByYearByID(newYear, ID)
-        }
-    }
-
-    fun loadPerMInfo(ID : Int) {
-        viewModelScope.launch {
-
-            Log.d("MyDebugs", "loadPerMInfo ID=" + ID)
-
-            if (ID == -1)
-                infoPerM.value = infoRepository.getInfoByYearMonth(newMY.monthValue, newMY.year)
-            else
-                infoPerM.value = infoRepository.getInfoByYearMonthByID(newMY.monthValue, newMY.year, ID)
-
-        }
-    }
-
-}

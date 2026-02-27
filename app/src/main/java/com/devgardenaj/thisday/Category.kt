@@ -34,18 +34,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import androidx.room.Room
 import com.devgardenaj.thisday.infra.CategoryColors
+import com.devgardenaj.thisday.infra.colorToHex
 import com.devgardenaj.thisday.infra.localeChecker
-import com.devgardenaj.thisday.room.CategoryDao
-import com.devgardenaj.thisday.room.*
+import com.devgardenaj.thisday.room.AppDatabase
+import com.devgardenaj.thisday.room.Category
 import com.devgardenaj.thisday.screens.BottomPanel
-import com.devgardenaj.thisday.widget.WidgetProvider
-import com.devgardenaj.thisday.widget.WidgetProvider.Companion.updateWidget
-import com.devgardenaj.thisday.widget.forceWidgetUpdate
-import kotlinx.coroutines.launch
+import androidx.core.graphics.toColorInt
 
 
 class CategoryActivity : AppCompatActivity() {
@@ -189,7 +184,7 @@ fun CategoryRow(category: CategoryTemp, onEdit: () -> Unit, onDelete: () -> Unit
                 modifier = Modifier
                     .size(24.dp)
                     .background(
-                        color = Color(android.graphics.Color.parseColor(category.categoryColor)),
+                        color = Color(category.categoryColor.toColorInt()),
                         shape = CircleShape
                     )            )
             Log.d("Here", "Color" + category.categoryColor)
@@ -217,14 +212,13 @@ fun CategoryEditScreen(navController: NavHostController, viewModel: CategoryView
     var name by remember { mutableStateOf("") }
     var selectedColor by remember { mutableStateOf(colors[0]) }
     var showColorPicker by remember { mutableStateOf(false) }
-    var context = LocalContext.current
 
     LaunchedEffect(categoryId) {
         if (categoryId != null && categoryId != 0) {
             val category = viewModel.getCategoryById(categoryId)
             if (category != null) {
                 name = category.categoryName
-                selectedColor = Color(android.graphics.Color.parseColor(category.categoryColor))
+                selectedColor = Color(category.categoryColor.toColorInt())
             }
         }
     }
@@ -236,9 +230,9 @@ fun CategoryEditScreen(navController: NavHostController, viewModel: CategoryView
                 onClick = {
                     if (name.isNotBlank()) {
                         if (categoryId == null || categoryId == 0) {
-                            viewModel.insertCategory(name, ColorToHex(selectedColor))
+                            viewModel.insertCategory(name, colorToHex(selectedColor))
                         } else {
-                            viewModel.updateCategory(categoryId, name, ColorToHex(selectedColor))
+                            viewModel.updateCategory(categoryId, name, colorToHex(selectedColor))
                         }
 
                         navController.popBackStack()
@@ -355,53 +349,4 @@ fun DeleteWithDialog(
     )
 }
 
-class CategoryRepository(private val dao: CategoryDao, private val infoDao: InfoAboutDayDao) {
-    suspend fun insert(category: Category) = dao.insertAll(category)
-    suspend fun getAllNotDeleted() = dao.getAllNotDeleted()
-    suspend fun update(category: Category) = dao.update(category)
-    suspend fun deleteCategoryByID(id : Int) = dao.deleteCategoryByID(id)
-    suspend fun deleteInfoByID(id : Int) = infoDao.deleteInfoByID(id)
-}
 
-open class CategoryViewModel(private val repository: CategoryRepository) : ViewModel() {
-
-    var categories = mutableStateOf<List<Category>>(emptyList())
-        private set
-
-    fun loadCategories() {
-        viewModelScope.launch {
-            categories.value = repository.getAllNotDeleted()
-
-        }
-    }
-
-    fun insertCategory(name: String, color: String) {
-        viewModelScope.launch {
-            repository.insert(Category(0, name, color, 0))
-            loadCategories()
-        }
-    }
-
-    fun deleteCategory(id : Int)
-    {
-        viewModelScope.launch {
-            repository.deleteCategoryByID(id)
-            repository.deleteInfoByID(id)
-            loadCategories()
-        }
-
-
-    }
-
-    fun getCategoryById(id: Int): Category? {
-        return categories.value.find { it.categoryID == id }
-    }
-
-    fun updateCategory(id: Int, name: String, color: String) {
-        viewModelScope.launch {
-            val updated = Category(id, name, color, 0)
-            repository.update(updated)
-            loadCategories()
-        }
-    }
-}

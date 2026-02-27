@@ -3,7 +3,6 @@ package com.devgardenaj.thisday
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -25,15 +24,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
-import androidx.lifecycle.viewModelScope
-import androidx.room.Room
+import com.devgardenaj.thisday.infra.dateToCustomDate
 import com.devgardenaj.thisday.infra.dateToString
 import com.devgardenaj.thisday.infra.localeChecker
-import com.devgardenaj.thisday.room.*
+import com.devgardenaj.thisday.room.AppDatabase
 import com.devgardenaj.thisday.screens.BottomPanel
 import com.devgardenaj.thisday.widget.forceWidgetUpdate
-import kotlinx.coroutines.launch
 import java.time.LocalDate
+import androidx.core.graphics.toColorInt
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -53,8 +51,7 @@ class TodayActivity : AppCompatActivity() {
         }
         val myDay = LocalDate.now().plusDays(asset.toLong())
 
-        val today = DateToCustomDate(myDay)
-        //Log.d("MyDebug", "today 1 = " + today)
+        val today = dateToCustomDate(myDay)
 
 
 
@@ -183,6 +180,7 @@ fun TodayScreen(viewModel: TodayViewModel, asset: Int) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CategoryRowCountable(category: CategoryTemp,  viewModel: TodayViewModel) {
 
@@ -208,7 +206,7 @@ fun CategoryRowCountable(category: CategoryTemp,  viewModel: TodayViewModel) {
                 modifier = Modifier
                     .size(24.dp)
                     .background(
-                        color = Color(android.graphics.Color.parseColor(category.categoryColor)),
+                        color = Color(category.categoryColor.toColorInt()),
                         shape = CircleShape
                     )
             )
@@ -241,56 +239,4 @@ fun CategoryRowCountable(category: CategoryTemp,  viewModel: TodayViewModel) {
             }
         }
     }
-}
-
-
-class InfoRepository(private val dao: InfoAboutDayDao) {
-    suspend fun getInfoByDay(infoDay: Int, infoMonth: Int, infoYear: Int) = dao.getInfoByDay(infoDay, infoMonth, infoYear)
-    suspend fun getInfoByYear(infoYear: Int) = dao.getInfoByYear( infoYear)
-    suspend fun getInfoByYearByID(infoYear: Int, ID : Int) = dao.getInfoByYearByID( infoYear, ID)
-    suspend fun getInfoByYearMonth(infoM : Int, infoYear: Int) = dao.getInfoByYearM(infoM, infoYear)
-    suspend fun getInfoByYearMonthByID(infoM : Int, infoYear: Int, ID : Int) = dao.getInfoByYearMByID(infoM, infoYear, ID)
-    suspend fun updateInfo(infoSummary: InfoAboutDay) = dao.updateInfo(infoSummary)
-    suspend fun insertInfo(infoSummary: InfoAboutDay) = dao.insertInfo(infoSummary)
-    suspend fun getAll(infoDay: Int, infoMonth: Int, infoYear: Int) = dao.getAll(infoDay, infoMonth, infoYear)
-
-
-}
-
-class TodayViewModel(private val repository: CategoryRepository, private val infoRepository: InfoRepository, private val date : CustomDate) : CategoryViewModel(repository) {
-
-    var info = mutableStateOf<List<InfoSummary>>(emptyList())
-
-    fun loadInfo() {
-        viewModelScope.launch {
-            info.value = infoRepository.getInfoByDay(date.day, date.month, date.year)
-        }
-    }
-
-    fun updateCount(categoryId: Int, newCount: Int) {
-        viewModelScope.launch {
-            val existing = infoRepository.getAll(date.day, date.month, date.year)
-                .find { it.categoryID == categoryId }
-
-            if (existing != null) {
-                infoRepository.updateInfo(
-                    existing.copy(infoSum = newCount)
-                )
-            } else {
-                infoRepository.insertInfo(
-                    InfoAboutDay(
-                        iID = 0,
-                        categoryID = categoryId,
-                        infoSum = newCount,
-                        infoDay = date.day,
-                        infoMonth = date.month,
-                        infoYear = date.year
-                    )
-                )
-            }
-
-            loadInfo()
-        }
-    }
-
 }

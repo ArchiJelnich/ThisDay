@@ -18,15 +18,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimeInput
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
@@ -37,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -48,11 +43,10 @@ import com.devgardenaj.thisday.infra.localeChecker
 import com.devgardenaj.thisday.infra.saveLanguage
 import com.devgardenaj.thisday.infra.setAppLocale
 import com.devgardenaj.thisday.screens.BottomPanel
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import android.provider.Settings
-import android.util.Log
 import androidx.core.app.ActivityCompat
+import androidx.core.content.edit
+import androidx.core.net.toUri
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -151,10 +145,10 @@ fun SettingsScreen() {
 
 
                                 if (isNotification){
-                                    preferences.edit().putInt("setting_notification", 1).apply()
+                                    preferences.edit { putInt("setting_notification", 1) }
                                 }
                                 else{
-                                    preferences.edit().putInt("setting_notification", 0).apply()
+                                    preferences.edit { putInt("setting_notification", 0) }
                                 }
 
 
@@ -215,10 +209,10 @@ fun ShowPicker(){
     )
 
     LaunchedEffect(timePickerState.hour, timePickerState.minute) {
-        preferences.edit()
-            .putInt("notification_hour", timePickerState.hour)
-            .putInt("notification_minute", timePickerState.minute)
-            .apply()
+        preferences.edit {
+            putInt("notification_hour", timePickerState.hour)
+                .putInt("notification_minute", timePickerState.minute)
+        }
 
     }
 
@@ -269,7 +263,7 @@ class SettingActivity : ComponentActivity() {
                 AlarmHelper.setDailyAlarm(this, notificationHour, notificationMinute)
             } else {
                 val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-                intent.data = Uri.parse("package:$packageName")
+                intent.data = "package:$packageName".toUri()
                 startActivity(intent)
             }
         } else {
