@@ -33,8 +33,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        }
     }
     buildFeatures {
         compose = true
@@ -58,8 +60,6 @@ dependencies {
     implementation(libs.androidx.leanback)
     implementation(libs.androidx.navigation.runtime.android)
     implementation(libs.androidx.navigation.compose.android)
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.foundation)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -67,7 +67,6 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation(libs.compose)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.material3)
     testImplementation(libs.junit)
@@ -75,5 +74,5 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     kapt(libs.androidx.room.compiler)
     implementation(libs.coil.compose)
-
+    implementation(libs.androidx.material.icons.extended)
 }
