@@ -1,7 +1,9 @@
-package com.devgardenaj.thisday
+package com.devgardenaj.thisday.view
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
+import com.devgardenaj.thisday.repo.CategoryRepository
+import com.devgardenaj.thisday.repo.InfoRepository
 import com.devgardenaj.thisday.infra.CustomDate
 import com.devgardenaj.thisday.room.InfoAboutDay
 import com.devgardenaj.thisday.room.InfoSummary

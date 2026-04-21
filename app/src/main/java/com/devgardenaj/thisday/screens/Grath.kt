@@ -1,4 +1,4 @@
-package com.devgardenaj.thisday
+package com.devgardenaj.thisday.screens
 
 import android.content.Intent
 import android.os.Build
@@ -61,10 +61,13 @@ import com.devgardenaj.thisday.infra.MonthAverage
 import com.devgardenaj.thisday.infra.monthCount
 import com.devgardenaj.thisday.infra.dateMYToString
 import com.devgardenaj.thisday.infra.dateToCustomDate
-import com.devgardenaj.thisday.screens.BottomPanel
 import androidx.core.graphics.toColorInt
+import com.devgardenaj.thisday.R
+import com.devgardenaj.thisday.repo.CategoryRepository
+import com.devgardenaj.thisday.repo.InfoRepository
 import com.devgardenaj.thisday.room.AppDatabase
 import com.devgardenaj.thisday.room.Category
+import com.devgardenaj.thisday.view.GraphViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 class GraphActivity : ComponentActivity() {

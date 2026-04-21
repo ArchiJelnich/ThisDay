@@ -1,4 +1,4 @@
-package com.devgardenaj.thisday
+package com.devgardenaj.thisday.screens
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -33,14 +33,15 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import com.devgardenaj.thisday.infra.CategoryColors
 import com.devgardenaj.thisday.infra.colorToHex
 import com.devgardenaj.thisday.infra.localeChecker
 import com.devgardenaj.thisday.room.AppDatabase
 import com.devgardenaj.thisday.room.Category
-import com.devgardenaj.thisday.screens.BottomPanel
 import androidx.core.graphics.toColorInt
+import com.devgardenaj.thisday.R
+import com.devgardenaj.thisday.repo.CategoryRepository
+import com.devgardenaj.thisday.view.CategoryViewModel
 
 
 class CategoryActivity : AppCompatActivity() {

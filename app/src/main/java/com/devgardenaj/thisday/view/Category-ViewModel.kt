@@ -1,8 +1,9 @@
-package com.devgardenaj.thisday
+package com.devgardenaj.thisday.view
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.devgardenaj.thisday.repo.CategoryRepository
 import com.devgardenaj.thisday.infra.inputChecker
 import com.devgardenaj.thisday.room.Category
 import kotlinx.coroutines.launch

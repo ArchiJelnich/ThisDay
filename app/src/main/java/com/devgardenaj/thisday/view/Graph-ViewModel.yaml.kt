@@ -1,10 +1,12 @@
-package com.devgardenaj.thisday
+package com.devgardenaj.thisday.view
 
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewModelScope
+import com.devgardenaj.thisday.repo.CategoryRepository
+import com.devgardenaj.thisday.repo.InfoRepository
 import com.devgardenaj.thisday.infra.DayInfo
 import com.devgardenaj.thisday.infra.MonthAverage
 import com.devgardenaj.thisday.infra.parseColor

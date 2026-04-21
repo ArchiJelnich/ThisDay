@@ -1,9 +1,9 @@
-package com.devgardenaj.thisday
+package com.devgardenaj.thisday.screens
 
+import android.Manifest
 import android.app.AlarmManager
 import android.content.Intent
 import android.icu.util.Calendar
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -42,11 +42,11 @@ import com.devgardenaj.thisday.infra.loadLanguage
 import com.devgardenaj.thisday.infra.localeChecker
 import com.devgardenaj.thisday.infra.saveLanguage
 import com.devgardenaj.thisday.infra.setAppLocale
-import com.devgardenaj.thisday.screens.BottomPanel
 import android.provider.Settings
 import androidx.core.app.ActivityCompat
 import androidx.core.content.edit
 import androidx.core.net.toUri
+import com.devgardenaj.thisday.R
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -154,7 +154,8 @@ fun SettingsScreen() {
 
                             }
                         )
-                        Text(text = if (isNotification) stringResource(R.string.on) else stringResource(R.string.off), modifier = Modifier.padding(start = 8.dp))
+                        Text(text = if (isNotification) stringResource(R.string.on) else stringResource(
+                            R.string.off), modifier = Modifier.padding(start = 8.dp))
                     }
 
                     if (isNotification){
@@ -242,7 +243,7 @@ class SettingActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= 33) {
             ActivityCompat.requestPermissions(
                 this,
-                arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
                 1
             )
         }

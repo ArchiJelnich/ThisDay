@@ -1,4 +1,4 @@
-package com.devgardenaj.thisday
+package com.devgardenaj.thisday.repo
 
 import com.devgardenaj.thisday.room.Category
 import com.devgardenaj.thisday.room.CategoryDao

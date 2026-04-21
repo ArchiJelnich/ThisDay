@@ -3,7 +3,7 @@ package com.devgardenaj.thisday.infra
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.devgardenaj.thisday.room.Category
-import com.devgardenaj.thisday.GraphViewModel
+import com.devgardenaj.thisday.view.GraphViewModel
 import com.devgardenaj.thisday.room.InfoAboutDay
 import java.time.YearMonth
 import kotlin.math.roundToInt

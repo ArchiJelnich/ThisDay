@@ -1,4 +1,4 @@
-package com.devgardenaj.thisday
+package com.devgardenaj.thisday.screens
 
 import android.content.Intent
 import android.os.Build
@@ -28,10 +28,13 @@ import com.devgardenaj.thisday.infra.dateToCustomDate
 import com.devgardenaj.thisday.infra.dateToString
 import com.devgardenaj.thisday.infra.localeChecker
 import com.devgardenaj.thisday.room.AppDatabase
-import com.devgardenaj.thisday.screens.BottomPanel
 import com.devgardenaj.thisday.widget.forceWidgetUpdate
 import java.time.LocalDate
 import androidx.core.graphics.toColorInt
+import com.devgardenaj.thisday.R
+import com.devgardenaj.thisday.repo.CategoryRepository
+import com.devgardenaj.thisday.repo.InfoRepository
+import com.devgardenaj.thisday.view.TodayViewModel
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -182,7 +185,7 @@ fun TodayScreen(viewModel: TodayViewModel, asset: Int) {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun CategoryRowCountable(category: CategoryTemp,  viewModel: TodayViewModel) {
+fun CategoryRowCountable(category: CategoryTemp, viewModel: TodayViewModel) {
 
 
 
