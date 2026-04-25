@@ -9,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.*
+import com.devgardenaj.thisday.infra.ThisDayTheme
 import com.devgardenaj.thisday.infra.localeChecker
 import java.time.LocalDate
 import androidx.compose.foundation.background
@@ -31,11 +32,9 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -81,65 +80,70 @@ class GraphActivity : ComponentActivity() {
         var asset = 0
         var assetMY = 0
         if (extras != null) {
-            asset =  intent.extras?.get("asset") as Int
+            asset = intent.extras?.get("asset") as Int
         }
         if (extras != null) {
-            assetMY =  intent.extras?.get("assetMY") as Int
+            assetMY = intent.extras?.get("assetMY") as Int
         }
 
-        var newYear = myDay.year+asset
-        var newMY = LocalDate.now().plusMonths(assetMY.toLong())
+        val newYear = myDay.year + asset
+        val newMY = LocalDate.now().plusMonths(assetMY.toLong())
 
         GraphViewModel(catRepo, infoRepo, newYear, newMY)
     }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
         val extras = intent.extras
         var asset = 0
         var assetMY = 0
         if (extras != null) {
-            asset =  intent.extras?.get("asset") as Int
+            asset = intent.extras?.get("asset") as Int
         }
         if (extras != null) {
-            assetMY =  intent.extras?.get("assetMY") as Int
+            assetMY = intent.extras?.get("assetMY") as Int
         }
 
         var selectedView = "month"
         if (extras != null) {
-            selectedView =  intent.extras?.get("view") as String
+            selectedView = intent.extras?.get("view") as String
         }
 
         localeChecker(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-                Surface(color = MaterialTheme.colorScheme.background) {
+            ThisDayTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
                     GraphScreen(viewModel, asset, assetMY, selectedView)
                 }
             }
+        }
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun GraphScreen(viewModel : GraphViewModel, asset: Int, assetMY : Int, selectedViewExtra : String) {
+fun GraphScreen(viewModel: GraphViewModel, asset: Int, assetMY: Int, selectedViewExtra: String) {
     var selectedView by remember { mutableStateOf(selectedViewExtra) }
     var showFilterPicker by remember { mutableStateOf(false) }
     val categories by viewModel.categories
-    var chosenCategory by remember { mutableStateOf(
-        Category(
-            categoryID = -1,
-            categoryName = "null",
-            categoryColor = "null",
-            categoryDeletedFlag = 0,
+    var chosenCategory by remember {
+        mutableStateOf(
+            Category(
+                categoryID = -1,
+                categoryName = "null",
+                categoryColor = "null",
+                categoryDeletedFlag = 0,
+            )
         )
-    ) }
+    }
     var filterApplied by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-
         Log.d("MyDebugs", "Stage 1")
         viewModel.loadCategories()
         viewModel.loadInfo(chosenCategory.categoryID)
@@ -147,235 +151,214 @@ fun GraphScreen(viewModel : GraphViewModel, asset: Int, assetMY : Int, selectedV
     averageCount(viewModel, chosenCategory)
     monthCount(viewModel, chosenCategory)
 
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ){
-            Column(modifier = Modifier.fillMaxSize()) {
-                Text(
-                    text = stringResource(R.string.graph),
-                    style = MaterialTheme.typography.headlineLarge,
-                    modifier = Modifier
-                        .align(alignment = Alignment.CenterHorizontally)
-                        .padding(top = 40.dp)
-                        .padding(bottom = 20.dp),
-                    textAlign = TextAlign.Center
+    Column(modifier = Modifier.fillMaxSize()) {
+        Text(
+            text = stringResource(R.string.graph),
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier
+                .align(alignment = Alignment.CenterHorizontally)
+                .padding(top = 40.dp)
+                .padding(bottom = 20.dp),
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            FilterChip(
+                selected = selectedView == "month",
+                onClick = { selectedView = "month" },
+                label = { Text(stringResource(R.string.month)) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 )
+            )
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Button(
-                        onClick = { selectedView = "month" },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor =
-                                if (selectedView == "month")
-                                    MaterialTheme.colorScheme.primary
-                                else
-                                    MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    ) {
-                        Text(
-                            stringResource(R.string.month),
-                            color =
-                                if (selectedView == "month")
-                                    MaterialTheme.colorScheme.onPrimary
-                                else
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+            Spacer(modifier = Modifier.width(12.dp))
 
-                    Spacer(modifier = Modifier.width(16.dp))
+            FilterChip(
+                selected = selectedView == "year",
+                onClick = { selectedView = "year" },
+                label = { Text(stringResource(R.string.year)) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+            )
 
-                    Button(
-                        onClick = { selectedView = "year" },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor =
-                                if (selectedView == "year")
-                                    MaterialTheme.colorScheme.primary
-                                else
-                                    MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    ) {
-                        Text(
-                            stringResource(R.string.year),
-                            color =
-                                if (selectedView == "year")
-                                    MaterialTheme.colorScheme.onPrimary
-                                else
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+            IconButton(onClick = { showFilterPicker = true }) {
+                Icon(
+                    painter = painterResource(R.drawable.icon_filter),
+                    contentDescription = "filter",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
 
-                    IconButton(onClick = { showFilterPicker = true }) {
-                        Icon(
-                            painter = painterResource(R.drawable.icon_filter),
-                            contentDescription = "filter",
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .size(24.dp)
-                            .then(
-                                if (filterApplied)
-                                    Modifier.background(
-                                        Color(chosenCategory.categoryColor.toColorInt()),
-                                        CircleShape
-                                    )
-                                        else
-                                    Modifier
+            Box(
+                modifier = Modifier
+                    .size(20.dp)
+                    .then(
+                        if (filterApplied)
+                            Modifier.background(
+                                Color(chosenCategory.categoryColor.toColorInt()),
+                                CircleShape
                             )
+                        else
+                            Modifier
                     )
+            )
+        }
 
-                }
-
-                if (showFilterPicker) {
-                    Dialog(
-                        onDismissRequest = { showFilterPicker = false }
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clickable(
-                                    indication = null,
-                                    interactionSource = remember { MutableInteractionSource() }
-                                ) {
-                                    filterApplied = false
-                                    showFilterPicker = false
-                                    chosenCategory = Category(
-                                        categoryID = -1,
-                                        categoryName = "null",
-                                        categoryColor = "null",
-                                        categoryDeletedFlag = 0,
-                                    )
-                                    Log.d("MyDebugs", "Stage 2")
-                                    viewModel.loadPerMInfo(chosenCategory.categoryID)
-                                    viewModel.loadInfo(chosenCategory.categoryID)
-                                }
+        if (showFilterPicker) {
+            Dialog(
+                onDismissRequest = { showFilterPicker = false }
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
                         ) {
-
-                            LazyColumn(
-                                verticalArrangement = Arrangement.spacedBy(12.dp),
-                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                            filterApplied = false
+                            showFilterPicker = false
+                            chosenCategory = Category(
+                                categoryID = -1,
+                                categoryName = "null",
+                                categoryColor = "null",
+                                categoryDeletedFlag = 0,
+                            )
+                            Log.d("MyDebugs", "Stage 2")
+                            viewModel.loadPerMInfo(chosenCategory.categoryID)
+                            viewModel.loadInfo(chosenCategory.categoryID)
+                        }
+                ) {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = 100.dp)
+                            .background(
+                                MaterialTheme.colorScheme.surface,
+                                RoundedCornerShape(20.dp)
+                            )
+                            .clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            ) {}
+                    ) {
+                        items(categories) { category ->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier
-                                    .align(Alignment.TopCenter)
-                                    .padding(top = 100.dp)
-                                    .background(
-                                        MaterialTheme.colorScheme.surface,
-                                        RoundedCornerShape(16.dp)
-                                    )
-                                    .clickable(
-                                        indication = null,
-                                        interactionSource = remember { MutableInteractionSource() }
-                                    ) {}
-                            ) {
-                                items(categories) { category ->
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clickable {
-                                                filterApplied = true
-                                                showFilterPicker = false
-                                                chosenCategory = category
-                                                Log.d("MyDebugs", "Stage 3")
-                                                viewModel.loadPerMInfo(chosenCategory.categoryID)
-                                                viewModel.loadInfo(chosenCategory.categoryID)
-
-                                            }
-                                            .padding(horizontal = 8.dp, vertical = 6.dp)
-                                    ) {
-
-                                        Box(
-                                            modifier = Modifier
-                                                .size(24.dp)
-                                                .clip(CircleShape)
-                                                .background(
-                                                    Color(
-                                                        category.categoryColor.toColorInt()
-                                                    )
-                                                )
-                                        )
-
-                                        Spacer(modifier = Modifier.width(8.dp))
-
-                                        Text(
-                                            text = category.categoryName,
-                                            fontWeight = FontWeight.Medium
-                                        )
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        filterApplied = true
+                                        showFilterPicker = false
+                                        chosenCategory = category
+                                        Log.d("MyDebugs", "Stage 3")
+                                        viewModel.loadPerMInfo(chosenCategory.categoryID)
+                                        viewModel.loadInfo(chosenCategory.categoryID)
                                     }
-                                }
+                                    .padding(horizontal = 8.dp, vertical = 8.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(22.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(category.categoryColor.toColorInt()))
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Text(
+                                    text = category.categoryName,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
                             }
                         }
                     }
                 }
-                    Column(modifier = Modifier.weight(1f)) {
-                        PeriodContent(selectedView, asset, assetMY, viewModel)
-                    }
-
-
-
-
-                BottomPanel()
             }
-        }}
+        }
+
+        Column(modifier = Modifier.weight(1f)) {
+            PeriodContent(selectedView, asset, assetMY, viewModel)
+        }
+
+        BottomPanel()
+    }
+}
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun PeriodContent(view: String, asset : Int, assetMY: Int, viewModel : ViewModel) {
-
+fun PeriodContent(view: String, asset: Int, assetMY: Int, viewModel: ViewModel) {
     var newAsset = asset
     var newAssetMY = assetMY
     val newDateMY = LocalDate.now().plusMonths(newAssetMY.toLong())
-    val newDate = LocalDate.now().year+asset
+    val newDate = LocalDate.now().year + asset
     val context = LocalContext.current
     val dayOfm = newDateMY.lengthOfMonth()
 
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .padding(16.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Button(onClick = {
+            IconButton(onClick = {
                 if (view == "year") {
-                newAsset--
-                val intent = Intent(context, GraphActivity::class.java)
-                intent.putExtra("asset", newAsset)
-                intent.putExtra("assetMY", 0)
-                intent.putExtra("view", view)
-                context.startActivity(intent)}
-
+                    newAsset--
+                    val intent = Intent(context, GraphActivity::class.java)
+                    intent.putExtra("asset", newAsset)
+                    intent.putExtra("assetMY", 0)
+                    intent.putExtra("view", view)
+                    context.startActivity(intent)
+                }
                 if (view == "month") {
                     newAssetMY--
-
                     Log.d("MyAsset", newAssetMY.toString())
                     val intent = Intent(context, GraphActivity::class.java)
                     intent.putExtra("asset", 0)
                     intent.putExtra("assetMY", newAssetMY)
                     intent.putExtra("view", view)
-                    context.startActivity(intent)}
+                    context.startActivity(intent)
+                }
+            }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                    contentDescription = "Previous",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
 
-            }) { Text("<") }
-            Text(text = when (view) {
-                "month" -> dateMYToString(newDateMY)
-                "year" -> newDate.toString()
-                else -> ""
-            },
-                style = MaterialTheme.typography.headlineMedium,
+            Text(
+                text = when (view) {
+                    "month" -> dateMYToString(newDateMY)
+                    "year" -> newDate.toString()
+                    else -> ""
+                },
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Medium,
                 modifier = Modifier.weight(1f),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onBackground
             )
-            Button(onClick = {
+
+            IconButton(onClick = {
                 if (view == "year") {
                     newAsset++
                     val intent = Intent(context, GraphActivity::class.java)
                     intent.putExtra("asset", newAsset)
                     intent.putExtra("assetMY", 0)
                     intent.putExtra("view", view)
-                    context.startActivity(intent)}
-
+                    context.startActivity(intent)
+                }
                 if (view == "month") {
                     newAssetMY++
                     Log.d("MyAsset", newAssetMY.toString())
@@ -383,24 +366,28 @@ fun PeriodContent(view: String, asset : Int, assetMY: Int, viewModel : ViewModel
                     intent.putExtra("asset", 0)
                     intent.putExtra("assetMY", newAssetMY)
                     intent.putExtra("view", view)
-                    context.startActivity(intent)}
-
-            }) { Text(">") }
+                    context.startActivity(intent)
+                }
+            }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = "Next",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
         }
         Spacer(modifier = Modifier.height(8.dp))
         PeriodGrid(view, viewModel as GraphViewModel, dayOfm)
-
     }
 }
 
 @Composable
-fun PeriodGrid(view: String,
-               viewModel: GraphViewModel,
-               dayOfm : Int
+fun PeriodGrid(
+    view: String,
+    viewModel: GraphViewModel,
+    dayOfm: Int
 ) {
-
     Log.d("MyLog", "Look here!" + viewModel.categories)
-
 
     when (view) {
         "year" -> YearGrid(
@@ -410,17 +397,17 @@ fun PeriodGrid(view: String,
         "month" -> MonthGrid(
             monthInfo = viewModel.monthInfo.value,
             categoryColors = viewModel.categoryColors,
-            dayOfm = dayOfm)
+            dayOfm = dayOfm
+        )
     }
-
 }
 
 @Composable
 fun MonthGrid(
     monthInfo: List<DayInfo>,
     categoryColors: Map<Int, Color>,
-    dayOfm : Int)
-{
+    dayOfm: Int
+) {
     val blockSize = 17.dp
     val blockSpacing = 2.dp
     val maxBlocks = 24
@@ -436,13 +423,11 @@ fun MonthGrid(
             verticalAlignment = Alignment.Bottom
         ) {
             items(monthInfo) { dayInfo ->
-
                 val isToday = dayInfo.day == dayOfm
 
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-
                     Box(
                         modifier = Modifier
                             .height(graphHeight)
@@ -509,18 +494,15 @@ fun YearGrid(
             verticalAlignment = Alignment.Bottom
         ) {
             items(monthAverages) { monthData ->
-
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-
                     Box(
                         modifier = Modifier
                             .height(graphHeight)
                             .width(24.dp),
                         contentAlignment = Alignment.BottomCenter
                     ) {
-
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
@@ -536,7 +518,6 @@ fun YearGrid(
                                             .background(color, RoundedCornerShape(3.dp))
                                     )
                                     Spacer(modifier = Modifier.height(blockSpacing))
-
                                 }
                             }
                         }
@@ -546,7 +527,8 @@ fun YearGrid(
 
                     Text(
                         text = monthData.month.toString(),
-                        style = MaterialTheme.typography.labelSmall
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
@@ -561,7 +543,6 @@ fun reorderByRainbow(
     values: Map<Int, Int>,
     categoryColors: Map<Int, Color>
 ): List<Pair<Color, Int>> {
-
     val rainbowIndex = CategoryColors
         .withIndex()
         .associate { it.value to it.index }
@@ -575,4 +556,3 @@ fun reorderByRainbow(
             rainbowIndex[color] ?: Int.MAX_VALUE
         }
 }
-
