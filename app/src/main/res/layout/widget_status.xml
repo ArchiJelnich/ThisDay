@@ -1,14 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:gravity="center">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="58dp"
+    android:layout_height="58dp">
 
+    <!-- peach outer circle -->
+    <ImageView
+        android:layout_width="58dp"
+        android:layout_height="58dp"
+        android:layout_gravity="center"
+        android:src="@drawable/widget_background"
+        android:contentDescription="@null"/>
+
+    <!-- cream halo -->
+    <ImageView
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_gravity="center"
+        android:src="@drawable/widget_circle_halo"
+        android:contentDescription="@null"/>
+
+    <!-- top-category color circle -->
     <ImageView
         android:id="@+id/statusCircle"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:layout_gravity="center"
         android:src="@drawable/circle_shape"
         android:contentDescription="Widget"/>
 
-</LinearLayout>
+</FrameLayout>

@@ -13,6 +13,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -24,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import com.devgardenaj.thisday.infra.ThisDayTheme
 import com.devgardenaj.thisday.infra.dateToCustomDate
 import com.devgardenaj.thisday.infra.dateToString
 import com.devgardenaj.thisday.infra.localeChecker
@@ -40,8 +44,6 @@ import com.devgardenaj.thisday.view.TodayViewModel
 @RequiresApi(Build.VERSION_CODES.O)
 class TodayActivity : AppCompatActivity() {
 
-
-
     private val viewModel by lazy {
         val db = AppDatabase.getInstance(applicationContext)
         val repo = CategoryRepository(db.CategoryDao(), db.InfoAboutDayDao())
@@ -50,30 +52,28 @@ class TodayActivity : AppCompatActivity() {
         val extras = intent.extras
         var asset = 0
         if (extras != null) {
-            asset =  intent.extras?.get("asset") as Int
+            asset = intent.extras?.get("asset") as Int
         }
         val myDay = LocalDate.now().plusDays(asset.toLong())
-
         val today = dateToCustomDate(myDay)
-
-
 
         TodayViewModel(repo, infoRepo, today)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
-
         val extras = intent.extras
         var asset = 0
         if (extras != null) {
-            asset =  intent.extras?.get("asset") as Int
+            asset = intent.extras?.get("asset") as Int
         }
 
         localeChecker(this)
         super.onCreate(savedInstanceState)
         setContent {
-            TodayScreen(viewModel, asset)
+            ThisDayTheme {
+                TodayScreen(viewModel, asset)
+            }
         }
     }
 }
@@ -95,90 +95,80 @@ fun TodayScreen(viewModel: TodayViewModel, asset: Int) {
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                ),
                 title = {
-
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-
-                        Button(onClick = {
+                        IconButton(onClick = {
                             newAsset--
                             val intent = Intent(context, TodayActivity::class.java)
                             intent.putExtra("asset", newAsset)
                             context.startActivity(intent)
-                        }) { Text("<") }
-
-                        if (asset==0){
-                    Text(
-                        text = stringResource(R.string.today),
-                        style = MaterialTheme.typography.headlineLarge,
-                        modifier = Modifier.weight(1f),
-                        textAlign = TextAlign.Center
-                    )}
-                        else {
-                            Text(
-                                text = dateToString(dateForName),
-                                style = MaterialTheme.typography.headlineLarge,
-                                modifier = Modifier.weight(1f),
-                                textAlign = TextAlign.Center
+                        }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                                contentDescription = "Previous day",
+                                tint = MaterialTheme.colorScheme.primary
                             )
-
                         }
-                    if (asset != 0){
 
-                    Button(onClick = {
-                        newAsset++
-                        val intent = Intent(context, TodayActivity::class.java)
-                        intent.putExtra("asset", newAsset)
-                        context.startActivity(intent)
-                    }) { Text(">") }
-                    }}
+                        Text(
+                            text = if (asset == 0) stringResource(R.string.today) else dateToString(dateForName),
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.weight(1f),
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
 
-
-
+                        if (asset != 0) {
+                            IconButton(onClick = {
+                                newAsset++
+                                val intent = Intent(context, TodayActivity::class.java)
+                                intent.putExtra("asset", newAsset)
+                                context.startActivity(intent)
+                            }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                    contentDescription = "Next day",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        } else {
+                            Spacer(modifier = Modifier.size(48.dp))
+                        }
+                    }
                 }
             )
         },
-        bottomBar = {
-            BottomPanel()
-        }
-
+        bottomBar = { BottomPanel() }
     ) { paddingValues ->
-
-
-
-
-
-
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            contentPadding = PaddingValues(vertical = 8.dp)
         ) {
-            LazyColumn(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                contentPadding = PaddingValues(vertical = 8.dp)
-            ) {
-                items(categories, key = { it.categoryID }) { category ->
-                    CategoryRowCountable(
-                        category = CategoryTemp(
-                            category.categoryID,
-                            category.categoryName,
-                            category.categoryColor
-                        ),
-                        viewModel = viewModel,
-                    )
-                    Divider()
-                }
+            items(categories, key = { it.categoryID }) { category ->
+                CategoryRowCountable(
+                    category = CategoryTemp(
+                        category.categoryID,
+                        category.categoryName,
+                        category.categoryColor
+                    ),
+                    viewModel = viewModel,
+                )
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
-
-
         }
     }
 }
@@ -186,9 +176,6 @@ fun TodayScreen(viewModel: TodayViewModel, asset: Int) {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CategoryRowCountable(category: CategoryTemp, viewModel: TodayViewModel) {
-
-
-
     val infoList by viewModel.info
     val totalSum = infoList.sumOf { it.infoSum }
     val maxLimit = 24
@@ -198,7 +185,7 @@ fun CategoryRowCountable(category: CategoryTemp, viewModel: TodayViewModel) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(
@@ -207,38 +194,74 @@ fun CategoryRowCountable(category: CategoryTemp, viewModel: TodayViewModel) {
         ) {
             Box(
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(22.dp)
                     .background(
                         color = Color(category.categoryColor.toColorInt()),
                         shape = CircleShape
                     )
             )
             Spacer(modifier = Modifier.width(12.dp))
-
             Box(modifier = Modifier.horizontalScroll(rememberScrollState())) {
                 Text(
                     text = category.categoryName,
                     fontWeight = FontWeight.Medium,
-                    maxLines = 1
+                    maxLines = 1,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Button(onClick = {
-                if (count > 0) {
-                    count--
-                    viewModel.updateCount(category.categoryID, count)
-                    forceWidgetUpdate(context)
-                }
-            }) { Text("-") }
-            Text(text = count.toString(), modifier = Modifier.padding(horizontal = 8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            FilledTonalIconButton(
+                onClick = {
+                    if (count > 0) {
+                        count--
+                        viewModel.updateCount(category.categoryID, count)
+                        forceWidgetUpdate(context)
+                    }
+                },
+                colors = IconButtonDefaults.filledTonalIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Text(
+                    text = "−",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Text(
+                text = count.toString(),
+                modifier = Modifier.widthIn(min = 28.dp),
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Medium,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
             if (totalSum < maxLimit) {
-                Button(onClick = {
-                    count++
-                    viewModel.updateCount(category.categoryID, count)
-                    forceWidgetUpdate(context)
-                }) { Text("+") }
+                FilledTonalIconButton(
+                    onClick = {
+                        count++
+                        viewModel.updateCount(category.categoryID, count)
+                        forceWidgetUpdate(context)
+                    },
+                    colors = IconButtonDefaults.filledTonalIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                ) {
+                    Text(
+                        text = "+",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            } else {
+                Spacer(modifier = Modifier.size(40.dp))
             }
         }
     }

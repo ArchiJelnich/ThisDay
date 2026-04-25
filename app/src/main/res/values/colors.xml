@@ -11,4 +11,9 @@
     <color name="app_light_green">#CBFAAE</color>
     <color name="app_green">#3F8315</color>
 
+    <!-- Peach theme tokens -->
+    <color name="peach_bg">#FFF8F5</color>
+    <color name="peach_surface">#FFEDE5</color>
+    <color name="peach_primary">#D4856A</color>
+    <color name="peach_bottom_bar">#FFEDE5</color>
 </resources>
