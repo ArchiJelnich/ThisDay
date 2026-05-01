@@ -3,29 +3,29 @@
     android:layout_width="58dp"
     android:layout_height="58dp">
 
-    <!-- peach outer circle -->
+    <!-- top-category color circle, fills the widget -->
+    <ImageView
+        android:id="@+id/statusCircle"
+        android:layout_width="58dp"
+        android:layout_height="58dp"
+        android:layout_gravity="center"
+        android:src="@drawable/circle_shape"
+        android:contentDescription="Widget"/>
+
+    <!-- app logo, same 34dp size as before -->
+    <ImageView
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:layout_gravity="center"
+        android:src="@drawable/peach_logo"
+        android:contentDescription="@null"/>
+
+    <!-- thin peach border on top -->
     <ImageView
         android:layout_width="58dp"
         android:layout_height="58dp"
         android:layout_gravity="center"
-        android:src="@drawable/widget_background"
+        android:src="@drawable/widget_border"
         android:contentDescription="@null"/>
-
-    <!-- cream halo -->
-    <ImageView
-        android:layout_width="44dp"
-        android:layout_height="44dp"
-        android:layout_gravity="center"
-        android:src="@drawable/widget_circle_halo"
-        android:contentDescription="@null"/>
-
-    <!-- top-category color circle -->
-    <ImageView
-        android:id="@+id/statusCircle"
-        android:layout_width="34dp"
-        android:layout_height="34dp"
-        android:layout_gravity="center"
-        android:src="@drawable/circle_shape"
-        android:contentDescription="Widget"/>
 
 </FrameLayout>

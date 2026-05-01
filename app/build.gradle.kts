@@ -75,4 +75,5 @@ dependencies {
     kapt(libs.androidx.room.compiler)
     implementation(libs.coil.compose)
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.ui.text.google.fonts)
 }
