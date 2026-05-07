@@ -59,11 +59,9 @@ import com.devgardenaj.thisday.infra.MonthAverage
 import com.devgardenaj.thisday.infra.monthCount
 import com.devgardenaj.thisday.infra.dateMYToString
 import com.devgardenaj.thisday.infra.dateToCustomDate
+import com.devgardenaj.thisday.infra.ThisDayApp
 import androidx.core.graphics.toColorInt
 import com.devgardenaj.thisday.R
-import com.devgardenaj.thisday.repo.CategoryRepository
-import com.devgardenaj.thisday.repo.InfoRepository
-import com.devgardenaj.thisday.room.AppDatabase
 import com.devgardenaj.thisday.room.Category
 import com.devgardenaj.thisday.view.GraphViewModel
 
@@ -71,9 +69,7 @@ import com.devgardenaj.thisday.view.GraphViewModel
 class GraphActivity : ComponentActivity() {
 
     private val viewModel by lazy {
-        val db = AppDatabase.getInstance(applicationContext)
-        val catRepo = CategoryRepository(db.CategoryDao(), db.InfoAboutDayDao())
-        val infoRepo = InfoRepository(db.InfoAboutDayDao())
+        val app = application as ThisDayApp
         val myDay = dateToCustomDate(LocalDate.now())
         val extras = intent.extras
         var asset = 0
@@ -84,11 +80,9 @@ class GraphActivity : ComponentActivity() {
         if (extras != null) {
             assetMY = intent.extras?.get("assetMY") as Int
         }
-
         val newYear = myDay.year + asset
         val newMY = LocalDate.now().plusMonths(assetMY.toLong())
-
-        GraphViewModel(catRepo, infoRepo, newYear, newMY)
+        GraphViewModel(app.categoryRepo, app.infoRepo, newYear, newMY)
     }
 
 

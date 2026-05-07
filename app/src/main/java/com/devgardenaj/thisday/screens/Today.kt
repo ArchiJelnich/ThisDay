@@ -27,17 +27,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import com.devgardenaj.thisday.infra.ThisDayApp
 import com.devgardenaj.thisday.infra.ThisDayTheme
 import com.devgardenaj.thisday.infra.dateToCustomDate
 import com.devgardenaj.thisday.infra.dateToString
 import com.devgardenaj.thisday.infra.localeChecker
-import com.devgardenaj.thisday.room.AppDatabase
 import com.devgardenaj.thisday.widget.forceWidgetUpdate
 import java.time.LocalDate
 import androidx.core.graphics.toColorInt
 import com.devgardenaj.thisday.R
-import com.devgardenaj.thisday.repo.CategoryRepository
-import com.devgardenaj.thisday.repo.InfoRepository
 import com.devgardenaj.thisday.view.TodayViewModel
 
 
@@ -45,10 +43,7 @@ import com.devgardenaj.thisday.view.TodayViewModel
 class TodayActivity : AppCompatActivity() {
 
     private val viewModel by lazy {
-        val db = AppDatabase.getInstance(applicationContext)
-        val repo = CategoryRepository(db.CategoryDao(), db.InfoAboutDayDao())
-        val infoRepo = InfoRepository(db.InfoAboutDayDao())
-
+        val app = application as ThisDayApp
         val extras = intent.extras
         var asset = 0
         if (extras != null) {
@@ -56,8 +51,7 @@ class TodayActivity : AppCompatActivity() {
         }
         val myDay = LocalDate.now().plusDays(asset.toLong())
         val today = dateToCustomDate(myDay)
-
-        TodayViewModel(repo, infoRepo, today)
+        TodayViewModel(app.categoryRepo, app.infoRepo, today)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

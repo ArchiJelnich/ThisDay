@@ -35,23 +35,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.draw.clip
 import com.devgardenaj.thisday.infra.CategoryColors
+import com.devgardenaj.thisday.infra.ThisDayApp
 import com.devgardenaj.thisday.infra.ThisDayTheme
 import com.devgardenaj.thisday.infra.colorToHex
 import com.devgardenaj.thisday.infra.localeChecker
-import com.devgardenaj.thisday.room.AppDatabase
 import com.devgardenaj.thisday.room.Category
 import androidx.core.graphics.toColorInt
 import com.devgardenaj.thisday.R
-import com.devgardenaj.thisday.repo.CategoryRepository
 import com.devgardenaj.thisday.view.CategoryViewModel
 
 
 class CategoryActivity : AppCompatActivity() {
 
     private val viewModel by lazy {
-        val db = AppDatabase.getInstance(applicationContext)
-        val repo = CategoryRepository(db.CategoryDao(), db.InfoAboutDayDao())
-        CategoryViewModel(repo)
+        CategoryViewModel((application as ThisDayApp).categoryRepo)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
