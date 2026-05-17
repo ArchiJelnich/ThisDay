@@ -3,28 +3,32 @@ package com.devgardenaj.thisday.room
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 
 @Dao
 interface CategoryDao {
-    @Query("SELECT * FROM Category")
-    suspend  fun getAll(): List<Category>
     @Query("SELECT * FROM Category WHERE categoryDeletedFlag = 0")
-    suspend  fun getAllNotDeleted(): List<Category>
+    suspend fun getAllNotDeleted(): List<Category>
     @Insert
-    suspend  fun insertAll(vararg category: Category)
-    @Query("SELECT * FROM Category WHERE categoryID = :categoryID")
-     suspend fun getCategoryByID(categoryID: Int): List<Category>
+    suspend fun insertAll(vararg category: Category)
 
     @Query("SELECT categoryColor FROM Category WHERE categoryID = :categoryID")
     suspend fun getColorByID(categoryID: Int): String
 
-    @Query("DELETE FROM Category")
-    fun deleteAll()
     @Update
     suspend fun update(category: Category)
     @Query("DELETE FROM Category WHERE categoryID = :categoryID")
     suspend fun deleteCategoryByID(categoryID: Int)
+
+    @Query("DELETE FROM InfoAboutDay WHERE categoryID = :categoryID")
+    suspend fun deleteInfoByCategoryID(categoryID: Int)
+
+    @Transaction
+    suspend fun deleteCategoryWithAllData(categoryID: Int) {
+        deleteCategoryByID(categoryID)
+        deleteInfoByCategoryID(categoryID)
+    }
 }
 
 @Dao
@@ -34,24 +38,17 @@ interface InfoAboutDayDao {
     @Query("SELECT * FROM InfoAboutDay WHERE infoYear = :infoYear")
     suspend fun getInfoByYear(infoYear: Int): List<InfoAboutDay>
     @Query("SELECT * FROM InfoAboutDay WHERE infoYear = :infoYear AND categoryID = :id")
-    suspend fun getInfoByYearByID(infoYear: Int, id : Int): List<InfoAboutDay>
+    suspend fun getInfoByYearByID(infoYear: Int, id: Int): List<InfoAboutDay>
     @Query("SELECT * FROM InfoAboutDay WHERE infoMonth = :infoM AND infoYear = :infoYear")
-    suspend fun getInfoByYearM(infoM : Int, infoYear: Int): List<InfoAboutDay>
+    suspend fun getInfoByYearM(infoM: Int, infoYear: Int): List<InfoAboutDay>
     @Query("SELECT * FROM InfoAboutDay WHERE infoMonth = :infoM AND infoYear = :infoYear AND categoryID = :id")
-    suspend fun getInfoByYearMByID(infoM : Int, infoYear: Int, id : Int): List<InfoAboutDay>
+    suspend fun getInfoByYearMByID(infoM: Int, infoYear: Int, id: Int): List<InfoAboutDay>
     @Update
     suspend fun updateInfo(infoDay: InfoAboutDay)
     @Insert
-    suspend  fun insertInfo(vararg infoDay: InfoAboutDay)
+    suspend fun insertInfo(vararg infoDay: InfoAboutDay)
     @Query("SELECT * FROM InfoAboutDay WHERE infoDay = :infoDay AND infoMonth = :infoMonth AND infoYear = :infoYear")
     suspend fun getAll(infoDay: Int, infoMonth: Int, infoYear: Int): List<InfoAboutDay>
-    @Query("DELETE FROM InfoAboutDay")
-    fun deleteAll()
-    @Query("SELECT * FROM InfoAboutDay")
-    suspend fun getAllInfo(): List<InfoAboutDay>
-    @Query("DELETE FROM InfoAboutDay WHERE categoryID = :categoryID")
-    suspend fun deleteInfoByID(categoryID: Int)
-
 }
 
 data class InfoSummary(

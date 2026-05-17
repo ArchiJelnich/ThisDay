@@ -9,6 +9,6 @@ class ThisDayApp : Application() {
 
     private val db by lazy { AppDatabase.getInstance(this) }
 
-    val categoryRepo by lazy { CategoryRepository(db.CategoryDao(), db.InfoAboutDayDao()) }
+    val categoryRepo by lazy { CategoryRepository(db.CategoryDao()) }
     val infoRepo by lazy { InfoRepository(db.InfoAboutDayDao()) }
 }

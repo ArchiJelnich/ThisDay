@@ -52,11 +52,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.ViewModel
-import com.devgardenaj.thisday.infra.averageCount
 import com.devgardenaj.thisday.infra.CategoryColors
 import com.devgardenaj.thisday.infra.DayInfo
 import com.devgardenaj.thisday.infra.MonthAverage
-import com.devgardenaj.thisday.infra.monthCount
 import com.devgardenaj.thisday.infra.dateMYToString
 import com.devgardenaj.thisday.infra.dateToCustomDate
 import com.devgardenaj.thisday.infra.ThisDayApp
@@ -135,9 +133,8 @@ fun GraphScreen(viewModel: GraphViewModel, asset: Int, assetMY: Int, selectedVie
         Log.d("MyDebugs", "Stage 1")
         viewModel.loadCategories()
         viewModel.loadInfo(chosenCategory.categoryID)
+        viewModel.loadPerMInfo(chosenCategory.categoryID)
     }
-    averageCount(viewModel, chosenCategory)
-    monthCount(viewModel, chosenCategory)
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,

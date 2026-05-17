@@ -10,7 +10,7 @@
         android:layout_height="58dp"
         android:layout_gravity="center"
         android:src="@drawable/circle_shape"
-        android:contentDescription="Widget"/>
+        android:contentDescription="@string/widget_desc"/>
 
     <!-- app logo, same 34dp size as before -->
     <ImageView

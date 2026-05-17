@@ -41,7 +41,7 @@ class TodayViewModel(private val repository: CategoryRepository, private val inf
                 )
             }
 
-            loadInfo()
+            info.value = infoRepository.getInfoByDay(date.day, date.month, date.year)
         }
     }
 

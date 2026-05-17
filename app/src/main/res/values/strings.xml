@@ -22,5 +22,5 @@
     <string name="month">Month</string>
     <string name="year">Year</string>
     <string name="delete_q">Delete?</string>
-    <string name="delete_message">Are you sure that you want fully to delete category? Historical info will be also affected</string>
+    <string name="widget_desc">ThisDay widget</string>
 </resources>

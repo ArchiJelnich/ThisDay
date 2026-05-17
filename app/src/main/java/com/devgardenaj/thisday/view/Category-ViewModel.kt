@@ -30,15 +30,11 @@ open class CategoryViewModel(private val repository: CategoryRepository) : ViewM
         }
     }
 
-    fun deleteCategory(id : Int)
-    {
+    fun deleteCategory(id: Int) {
         viewModelScope.launch {
-            repository.deleteCategoryByID(id)
-            repository.deleteInfoByID(id)
+            repository.deleteCategoryWithAllData(id)
             loadCategories()
         }
-
-
     }
 
     fun getCategoryById(id: Int): Category? {
