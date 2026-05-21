@@ -2,7 +2,7 @@ package com.devgardenaj.thisday.infra
 
 
 import android.content.Context
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import java.util.Locale
 import androidx.core.content.edit
 
@@ -29,8 +29,9 @@ fun setAppLocale(context: Context, myLocate: String) {
     Locale.setDefault(locale)
     val resources = context.resources
     val configuration = resources.configuration
-    configuration.locale = locale
+    configuration.setLocale(locale)
     configuration.setLayoutDirection(locale)
+    @Suppress("DEPRECATION")
     resources.updateConfiguration(configuration, resources.displayMetrics)
 
 }

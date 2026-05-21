@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -20,13 +22,40 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            // Читает из local.properties — не коммить .jks и пароли в git!
+            // В local.properties добавить:
+            //   STORE_FILE=../thisday-release.jks
+            //   STORE_PASSWORD=...
+            //   KEY_ALIAS=thisday
+            //   KEY_PASSWORD=...
+            val props = Properties()
+            val localPropsFile = rootProject.file("local.properties")
+            if (localPropsFile.exists()) {
+                localPropsFile.inputStream().use { stream -> props.load(stream) }
+            }
+            val storeFilePath = props.getProperty("STORE_FILE")
+            if (storeFilePath != null) storeFile = rootProject.file(storeFilePath)
+            storePassword = props.getProperty("STORE_PASSWORD")
+            keyAlias      = props.getProperty("KEY_ALIAS")
+            keyPassword   = props.getProperty("KEY_PASSWORD")
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
+        }
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
         }
     }
     compileOptions {
@@ -58,8 +87,13 @@ dependencies {
     implementation(libs.androidx.room.runtime.android)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.leanback)
+    implementation(libs.androidx.preference)
     implementation(libs.androidx.navigation.runtime.android)
     implementation(libs.androidx.navigation.compose.android)
+    implementation(libs.coil.compose)
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.ui.text.google.fonts)
+    kapt(libs.androidx.room.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -67,13 +101,4 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.material3)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    kapt(libs.androidx.room.compiler)
-    implementation(libs.coil.compose)
-    implementation(libs.androidx.material.icons.extended)
-    implementation(libs.androidx.ui.text.google.fonts)
 }

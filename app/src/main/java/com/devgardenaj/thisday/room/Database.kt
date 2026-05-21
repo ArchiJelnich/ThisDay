@@ -23,6 +23,9 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "thisday_app_database"
                 )
+                // первый публичный релиз: если схема изменится в будущем,
+                // добавить Migration(1,2){...} вместо этой строки
+                .fallbackToDestructiveMigration(true)
                 .addCallback(object : Callback() {
                         override fun onCreate(db: SupportSQLiteDatabase) {
                             super.onCreate(db)

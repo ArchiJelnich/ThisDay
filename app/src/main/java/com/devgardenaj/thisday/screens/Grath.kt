@@ -309,19 +309,23 @@ fun PeriodContent(view: String, asset: Int, assetMY: Int, viewModel: ViewModel) 
             IconButton(onClick = {
                 if (view == "year") {
                     newAsset--
-                    val intent = Intent(context, GraphActivity::class.java)
-                    intent.putExtra("asset", newAsset)
-                    intent.putExtra("assetMY", 0)
-                    intent.putExtra("view", view)
+                    val intent = Intent(context, GraphActivity::class.java).apply {
+                        putExtra("asset", newAsset)
+                        putExtra("assetMY", 0)
+                        putExtra("view", view)
+                        flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    }
                     context.startActivity(intent)
                 }
                 if (view == "month") {
                     newAssetMY--
                     Log.d("MyAsset", newAssetMY.toString())
-                    val intent = Intent(context, GraphActivity::class.java)
-                    intent.putExtra("asset", 0)
-                    intent.putExtra("assetMY", newAssetMY)
-                    intent.putExtra("view", view)
+                    val intent = Intent(context, GraphActivity::class.java).apply {
+                        putExtra("asset", 0)
+                        putExtra("assetMY", newAssetMY)
+                        putExtra("view", view)
+                        flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    }
                     context.startActivity(intent)
                 }
             }) {
@@ -348,19 +352,23 @@ fun PeriodContent(view: String, asset: Int, assetMY: Int, viewModel: ViewModel) 
             IconButton(onClick = {
                 if (view == "year") {
                     newAsset++
-                    val intent = Intent(context, GraphActivity::class.java)
-                    intent.putExtra("asset", newAsset)
-                    intent.putExtra("assetMY", 0)
-                    intent.putExtra("view", view)
+                    val intent = Intent(context, GraphActivity::class.java).apply {
+                        putExtra("asset", newAsset)
+                        putExtra("assetMY", 0)
+                        putExtra("view", view)
+                        flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    }
                     context.startActivity(intent)
                 }
                 if (view == "month") {
                     newAssetMY++
                     Log.d("MyAsset", newAssetMY.toString())
-                    val intent = Intent(context, GraphActivity::class.java)
-                    intent.putExtra("asset", 0)
-                    intent.putExtra("assetMY", newAssetMY)
-                    intent.putExtra("view", view)
+                    val intent = Intent(context, GraphActivity::class.java).apply {
+                        putExtra("asset", 0)
+                        putExtra("assetMY", newAssetMY)
+                        putExtra("view", view)
+                        flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    }
                     context.startActivity(intent)
                 }
             }) {

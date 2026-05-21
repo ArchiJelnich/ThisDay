@@ -103,8 +103,10 @@ fun TodayScreen(viewModel: TodayViewModel, asset: Int) {
                     ) {
                         IconButton(onClick = {
                             newAsset--
-                            val intent = Intent(context, TodayActivity::class.java)
-                            intent.putExtra("asset", newAsset)
+                            val intent = Intent(context, TodayActivity::class.java).apply {
+                                putExtra("asset", newAsset)
+                                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                            }
                             context.startActivity(intent)
                         }) {
                             Icon(
@@ -126,8 +128,10 @@ fun TodayScreen(viewModel: TodayViewModel, asset: Int) {
                         if (asset != 0) {
                             IconButton(onClick = {
                                 newAsset++
-                                val intent = Intent(context, TodayActivity::class.java)
-                                intent.putExtra("asset", newAsset)
+                                val intent = Intent(context, TodayActivity::class.java).apply {
+                                    putExtra("asset", newAsset)
+                                    flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                                }
                                 context.startActivity(intent)
                             }) {
                                 Icon(
@@ -173,7 +177,10 @@ fun CategoryRowCountable(category: CategoryTemp, viewModel: TodayViewModel) {
     val infoList by viewModel.info
     val totalSum = infoList.sumOf { it.infoSum }
     val maxLimit = 24
-    var count by remember { mutableIntStateOf(infoList.find { it.categoryID == category.categoryID }?.infoSum ?: 0) }
+    // remember(savedCount) — пересчитывается при каждом обновлении infoList из ViewModel,
+    // но при нажатии +/- обновляется сразу (оптимистичный UI без мерцания)
+    val savedCount = infoList.find { it.categoryID == category.categoryID }?.infoSum ?: 0
+    var count by remember(savedCount) { mutableIntStateOf(savedCount) }
     val context = LocalContext.current
 
     Row(
