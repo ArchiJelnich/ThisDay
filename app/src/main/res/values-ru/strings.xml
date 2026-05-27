@@ -22,5 +22,5 @@
     <string name="month">Месяц</string>
     <string name="year">Год</string>
     <string name="delete_q">Удалить?</string>
-    <string name="delete_message">Вы уверены, что хотите удалить? Исторические данные будут отчищены</string>
+    <string name="delete_message">Вы уверены, что хотите удалить? Исторические данные будут очищены</string>
 </resources>
